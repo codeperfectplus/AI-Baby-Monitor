@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login Logs - RTSP Monitor</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👶</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0a1e 0%, #1e1b3a 50%, #2d1b69 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+    <div class="max-w-7xl mx-auto">
+        <!-- Header -->
+        <div class="flex justify-between items-center mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-2">Login Logs</h1>
+                <p class="text-gray-300">Track user login activity and access patterns</p>
+            </div>
+            <div class="flex space-x-4">
+                <a href="{{ url_for('auth.user_management') }}" 
+                   class="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-lg font-medium hover:from-gray-700 hover:to-gray-800 transition-all duration-200 transform hover:scale-105">
+                    <i class="fas fa-users mr-2"></i>User Management
+                </a>
+                <a href="{{ url_for('index') }}" 
+                   class="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-6 py-3 rounded-lg font-medium hover:from-gray-700 hover:to-gray-800 transition-all duration-200 transform hover:scale-105">
+                    <i class="fas fa-home mr-2"></i>Dashboard
+                </a>
+            </div>
+        </div>
+
+        <!-- Login Logs Table -->
+        <div class="glass-card rounded-2xl overflow-hidden">
+            <div class="p-6 border-b border-gray-700">
+                <h2 class="text-xl font-semibold text-white">
+                    <i class="fas fa-history mr-2"></i>Recent Login Activity
+                </h2>
+            </div>
+            
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead class="bg-gray-800 bg-opacity-50">
+                        <tr>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">User</th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Login Time</th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">IP Address</th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">User Agent</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-700">
+                        {% for log in logs.items %}
+                        <tr class="hover:bg-gray-800 hover:bg-opacity-30 transition-colors duration-200">
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white text-sm font-medium mr-3">
+                                        {{ log.user.username[0].upper() }}
+                                    </div>
+                                    <div>
+                                        <div class="text-sm font-medium text-white">{{ log.user.username }}</div>
+                                        <div class="text-sm text-gray-400">{{ log.user.email }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-white">{{ log.login_time.strftime('%Y-%m-%d') }}</div>
+                                <div class="text-sm text-gray-400">{{ log.login_time.strftime('%H:%M:%S') }}</div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="text-sm text-gray-300 font-mono">{{ log.ip_address or 'N/A' }}</div>
+                            </td>
+                            <td class="px-6 py-4">
+                                <div class="text-sm text-gray-400 max-w-md truncate" title="{{ log.user_agent }}">
+                                    {{ log.user_agent or 'N/A' }}
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                
+                {% if not logs.items %}
+                <div class="text-center py-12">
+                    <i class="fas fa-history text-6xl text-gray-500 mb-4"></i>
+                    <p class="text-gray-400 text-lg">No login logs found</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if logs.pages > 1 %}
+        <div class="flex justify-center mt-8">
+            <nav class="flex items-center space-x-2">
+                {% if logs.has_prev %}
+                    <a href="{{ url_for('auth.login_logs', page=logs.prev_num) }}" 
+                       class="px-3 py-2 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600 transition-colors duration-200">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                {% else %}
+                    <span class="px-3 py-2 text-sm text-gray-500 bg-gray-800 rounded cursor-not-allowed">
+                        <i class="fas fa-chevron-left"></i>
+                    </span>
+                {% endif %}
+                
+                {% for page_num in logs.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != logs.page %}
+                            <a href="{{ url_for('auth.login_logs', page=page_num) }}" 
+                               class="px-3 py-2 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600 transition-colors duration-200">
+                                {{ page_num }}
+                            </a>
+                        {% else %}
+                            <span class="px-3 py-2 text-sm text-white bg-cyan-600 rounded">
+                                {{ page_num }}
+                            </span>
+                        {% endif %}
+                    {% else %}
+                        <span class="px-3 py-2 text-sm text-gray-500">...</span>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if logs.has_next %}
+                    <a href="{{ url_for('auth.login_logs', page=logs.next_num) }}" 
+                       class="px-3 py-2 text-sm text-gray-300 bg-gray-700 rounded hover:bg-gray-600 transition-colors duration-200">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                {% else %}
+                    <span class="px-3 py-2 text-sm text-gray-500 bg-gray-800 rounded cursor-not-allowed">
+                        <i class="fas fa-chevron-right"></i>
+                    </span>
+                {% endif %}
+            </nav>
+        </div>
+        
+        <div class="text-center mt-4">
+            <p class="text-gray-400 text-sm">
+                Showing {{ logs.per_page * (logs.page - 1) + 1 }} to {{ logs.per_page * (logs.page - 1) + logs.items|length }} 
+                of {{ logs.total }} entries
+            </p>
+        </div>
+        {% endif %}
+
+        <!-- Statistics -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-blue-500 bg-opacity-20 text-blue-400">
+                        <i class="fas fa-sign-in-alt text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-400">Total Logins</p>
+                        <p class="text-2xl font-bold text-white">{{ logs.total }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-green-500 bg-opacity-20 text-green-400">
+                        <i class="fas fa-clock text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-400">This Page</p>
+                        <p class="text-2xl font-bold text-white">{{ logs.items|length }}</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="glass-card rounded-xl p-6">
+                <div class="flex items-center">
+                    <div class="p-3 rounded-full bg-purple-500 bg-opacity-20 text-purple-400">
+                        <i class="fas fa-file-alt text-xl"></i>
+                    </div>
+                    <div class="ml-4">
+                        <p class="text-sm text-gray-400">Pages</p>
+                        <p class="text-2xl font-bold text-white">{{ logs.pages }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,58 @@
+services:
+  rtsp-recorder:
+    build: 
+      context: .
+      dockerfile: Dockerfile
+    container_name: rtsp-baby-monitor-web
+    restart: unless-stopped
+    
+    # Port mapping for web interface
+    ports:
+      - "8847:8847"
+    
+    # Environment variables
+    environment:
+      - RTSP_USERNAME=${RTSP_USERNAME:-username}
+      - RTSP_PASSWORD=${RTSP_PASSWORD:-password}
+      - RTSP_IP=${RTSP_IP:-192.168.1.3}
+      - RTSP_PORT=${RTSP_PORT:-554}
+      - RTSP_STREAM=${RTSP_STREAM:-stream1}
+      - FLASK_ENV=production
+      - PYTHONUNBUFFERED=1
+    
+    # Volume mappings
+    volumes:
+      # Map recordings directory (MONITOR_RECORDINGS_DIR)
+      - ${HOME}/ai-baby-monitor/recordings:/app/data/recordings
+
+      # Map snapshots directory for web interface
+      - ${HOME}/ai-baby-monitor/snapshots:/app/data/snapshots
+
+      # Map cache directory for AI models (MODEL_PATH)
+      - ${HOME}/ai-baby-monitor/.cache:/app/data/cache
+
+      # Map logs directory (LOG_FILE)
+      - ${HOME}/ai-baby-monitor/logs:/app/data/logs
+      
+      # Map config if you want to modify externally
+      - ./config:/app/config
+    
+    # Health check override
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8847/"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+
+volumes:
+  recordings:
+    driver: local
+  cache:
+    driver: local
+  logs:
+    driver: local
+
+networks:
+  default:
+    name: rtsp-network

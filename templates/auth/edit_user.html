@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Edit User - RTSP Monitor</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👶</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0a1e 0%, #1e1b3a 50%, #2d1b69 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #00f5ff;
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00f5ff 0%, #7c3aed 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 245, 255, 0.4);
+        }
+    </style>
+</head>
+<body class="min-h-screen p-6">
+    <div class="max-w-2xl mx-auto">
+        <!-- Header -->
+        <div class="flex items-center justify-between mb-8">
+            <div>
+                <h1 class="text-3xl font-bold text-white mb-2">Edit User</h1>
+                <p class="text-gray-300">Update user account information</p>
+            </div>
+            <a href="{{ url_for('auth.user_management') }}" 
+               class="text-cyan-400 hover:text-cyan-300 transition-colors duration-200">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Users
+            </a>
+        </div>
+
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="mb-6 space-y-2">
+                    {% for category, message in messages %}
+                        <div class="{% if category == 'error' %}bg-red-500{% elif category == 'success' %}bg-green-500{% elif category == 'info' %}bg-blue-500{% else %}bg-yellow-500{% endif %} bg-opacity-20 border border-{% if category == 'error' %}red{% elif category == 'success' %}green{% elif category == 'info' %}blue{% else %}yellow{% endif %}-400 text-{% if category == 'error' %}red{% elif category == 'success' %}green{% elif category == 'info' %}blue{% else %}yellow{% endif %}-300 px-4 py-3 rounded-lg backdrop-blur-lg">
+                            <p class="text-sm font-medium">{{ message }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+
+        <!-- User Info Card -->
+        <div class="glass-card rounded-2xl p-8 mb-6">
+            <div class="flex items-center mb-6">
+                <div class="w-16 h-16 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white text-2xl font-bold mr-4">
+                    {{ user.username[0].upper() }}
+                </div>
+                <div>
+                    <h2 class="text-2xl font-bold text-white">{{ user.username }}</h2>
+                    <p class="text-gray-400">{{ user.email }}</p>
+                    <div class="flex items-center mt-2 space-x-3">
+                        {% if user.active %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-500 bg-opacity-20 text-green-300 border border-green-400">
+                                <i class="fas fa-check-circle mr-1"></i>Active
+                            </span>
+                        {% else %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-500 bg-opacity-20 text-red-300 border border-red-400">
+                                <i class="fas fa-times-circle mr-1"></i>Inactive
+                            </span>
+                        {% endif %}
+                        {% if user.is_admin %}
+                            <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-purple-500 bg-opacity-20 text-purple-300 border border-purple-400">
+                                <i class="fas fa-crown mr-1"></i>Admin
+                            </span>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <form method="POST" class="space-y-6">
+                {{ form.hidden_tag() }}
+                
+                <!-- Username Field -->
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-user mr-2"></i>Username
+                    </label>
+                    {{ form.username(class="w-full px-4 py-3 input-field text-white placeholder-gray-400 rounded-lg focus:outline-none") }}
+                    {% if form.username.errors %}
+                        <div class="mt-1">
+                            {% for error in form.username.errors %}
+                                <p class="text-red-400 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Email Field -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-envelope mr-2"></i>Email Address
+                    </label>
+                    {{ form.email(class="w-full px-4 py-3 input-field text-white placeholder-gray-400 rounded-lg focus:outline-none") }}
+                    {% if form.email.errors %}
+                        <div class="mt-1">
+                            {% for error in form.email.errors %}
+                                <p class="text-red-400 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Status Field -->
+                <div>
+                    <label for="active" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-toggle-on mr-2"></i>Account Status
+                    </label>
+                    {{ form.active(class="w-full px-4 py-3 input-field text-white bg-transparent rounded-lg focus:outline-none") }}
+                    {% if form.active.errors %}
+                        <div class="mt-1">
+                            {% for error in form.active.errors %}
+                                <p class="text-red-400 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Admin Role Field -->
+                <div>
+                    <div class="flex items-center">
+                        {{ form.is_admin(class="w-4 h-4 text-cyan-400 bg-transparent border-gray-400 rounded focus:ring-cyan-400") }}
+                        <label for="is_admin" class="ml-3 text-sm text-gray-300">
+                            <i class="fas fa-crown mr-2"></i>Admin User
+                        </label>
+                    </div>
+                    <p class="text-xs text-gray-500 mt-1 ml-7">Admin users have access to user management and system settings</p>
+                    {% if form.is_admin.errors %}
+                        <div class="mt-1">
+                            {% for error in form.is_admin.errors %}
+                                <p class="text-red-400 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+
+                <!-- User Info -->
+                <div class="bg-blue-500 bg-opacity-20 border border-blue-400 text-blue-300 px-4 py-3 rounded-lg backdrop-blur-lg">
+                    <div class="text-sm space-y-1">
+                        <p><strong>Created:</strong> {{ user.created_at.strftime('%Y-%m-%d %H:%M:%S') if user.created_at else 'N/A' }}</p>
+                        <p><strong>Last Login:</strong> {{ user.last_login.strftime('%Y-%m-%d %H:%M:%S') if user.last_login else 'Never logged in' }}</p>
+                        <p><strong>Login Count:</strong> {{ user.login_logs|length }} times</p>
+                    </div>
+                </div>
+                
+                <!-- Submit Button -->
+                <div class="flex space-x-4">
+                    {{ form.submit(class="flex-1 py-3 px-4 btn-primary text-white font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50") }}
+                    <a href="{{ url_for('auth.user_management') }}" 
+                       class="flex-1 py-3 px-4 bg-gray-600 text-white font-semibold rounded-lg text-center hover:bg-gray-700 transition-colors duration-200">
+                        Cancel
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</body>
+</html>

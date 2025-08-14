@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - RTSP Monitor</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👶</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0a1e 0%, #1e1b3a 50%, #2d1b69 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .input-field {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.15);
+            border-color: #00f5ff;
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #00f5ff 0%, #7c3aed 100%);
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0, 245, 255, 0.4);
+        }
+        
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .floating-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 245, 255, 0.6);
+            border-radius: 50%;
+            animation: floatParticle 6s infinite linear;
+        }
+        
+        @keyframes floatParticle {
+            0% { 
+                transform: translateY(100vh) translateX(0px);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { 
+                transform: translateY(-10px) translateX(100px);
+                opacity: 0;
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4">
+    <!-- Floating particles background -->
+    <div class="fixed inset-0 pointer-events-none">
+        <div class="floating-particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-particle" style="left: 20%; animation-delay: 1s;"></div>
+        <div class="floating-particle" style="left: 30%; animation-delay: 2s;"></div>
+        <div class="floating-particle" style="left: 40%; animation-delay: 3s;"></div>
+        <div class="floating-particle" style="left: 50%; animation-delay: 4s;"></div>
+        <div class="floating-particle" style="left: 60%; animation-delay: 5s;"></div>
+    </div>
+
+    <div class="max-w-md w-full space-y-8 relative z-10">
+        <!-- Flash Messages -->
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <div class="space-y-2">
+                    {% for category, message in messages %}
+                        <div class="{% if category == 'error' %}bg-red-500{% elif category == 'success' %}bg-green-500{% elif category == 'info' %}bg-blue-500{% else %}bg-yellow-500{% endif %} bg-opacity-20 border border-{% if category == 'error' %}red{% elif category == 'success' %}green{% elif category == 'info' %}blue{% else %}yellow{% endif %}-400 text-{% if category == 'error' %}red{% elif category == 'success' %}green{% elif category == 'info' %}blue{% else %}yellow{% endif %}-300 px-4 py-3 rounded-lg backdrop-blur-lg">
+                            <p class="text-sm font-medium">{{ message }}</p>
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        {% endwith %}
+        
+        <!-- Signup Card -->
+        <div class="glass-card rounded-2xl p-8">
+            <div class="text-center mb-8">
+                <div class="floating-animation inline-block">
+                    <i class="fas fa-user-plus text-6xl text-cyan-400 mb-4"></i>
+                </div>
+                <h2 class="text-3xl font-bold text-white mb-2">Create Account</h2>
+                <p class="text-gray-300">Join AI Baby monitor platform</p>
+            </div>
+            
+            <form method="POST" class="space-y-6">
+                {{ form.hidden_tag() }}
+                
+                <!-- Username Field -->
+                <div>
+                    <label for="username" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-user mr-2"></i>Username
+                    </label>
+                    {{ form.username(class="w-full px-4 py-3 input-field text-white placeholder-gray-400 rounded-lg focus:outline-none", placeholder="Choose a username") }}
+                    {% if form.username.errors %}
+                        <div class="mt-1">
+                            {% for error in form.username.errors %}
+                                <p class="text-red-400 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Email Field -->
+                <div>
+                    <label for="email" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-envelope mr-2"></i>Email Address
+                    </label>
+                    {{ form.email(class="w-full px-4 py-3 input-field text-white placeholder-gray-400 rounded-lg focus:outline-none", placeholder="Enter your email") }}
+                    {% if form.email.errors %}
+                        <div class="mt-1">
+                            {% for error in form.email.errors %}
+                                <p class="text-red-400 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Password Field -->
+                <div>
+                    <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-lock mr-2"></i>Password
+                    </label>
+                    {{ form.password(class="w-full px-4 py-3 input-field text-white placeholder-gray-400 rounded-lg focus:outline-none", placeholder="Create a password") }}
+                    {% if form.password.errors %}
+                        <div class="mt-1">
+                            {% for error in form.password.errors %}
+                                <p class="text-red-400 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Confirm Password Field -->
+                <div>
+                    <label for="password2" class="block text-sm font-medium text-gray-300 mb-2">
+                        <i class="fas fa-lock mr-2"></i>Confirm Password
+                    </label>
+                    {{ form.password2(class="w-full px-4 py-3 input-field text-white placeholder-gray-400 rounded-lg focus:outline-none", placeholder="Confirm your password") }}
+                    {% if form.password2.errors %}
+                        <div class="mt-1">
+                            {% for error in form.password2.errors %}
+                                <p class="text-red-400 text-sm">{{ error }}</p>
+                            {% endfor %}
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <!-- Info Message -->
+                <div class="bg-blue-500 bg-opacity-20 border border-blue-400 text-blue-300 px-4 py-3 rounded-lg backdrop-blur-lg">
+                    <p class="text-sm">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        Your account will be inactive until approved by an administrator.
+                    </p>
+                </div>
+                
+                <!-- Submit Button -->
+                <div>
+                    {{ form.submit(class="w-full py-3 px-4 btn-primary text-white font-semibold rounded-lg focus:outline-none focus:ring-2 focus:ring-cyan-400 focus:ring-opacity-50") }}
+                </div>
+            </form>
+            
+            <!-- Sign In Link -->
+            <div class="text-center mt-6">
+                <p class="text-gray-300">
+                    Already have an account? 
+                    <a href="{{ url_for('auth.login') }}" class="text-cyan-400 hover:text-cyan-300 font-medium transition-colors duration-200">
+                        Sign in
+                    </a>
+                </p>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center">
+            <p class="text-gray-400 text-sm">
+                AI Baby monitor by code perfect plus
+            </p>
+        </div>
+    </div>
+</body>
+</html>

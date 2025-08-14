@@ -1,0 +1,1443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RTSP Baby Monitor AI Stream</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👶</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        :root {
+            --primary: #00f5ff;
+            --secondary: #7c3aed;
+            --accent: #10b981;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0a1e 0%, #1e1b3a 50%, #2d1b69 100%);
+            min-height: 100vh;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+        }
+        
+        .glass-card:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: rgba(0, 245, 255, 0.3);
+            transform: translateY(-2px);
+            transition: all 0.3s ease;
+        }
+        
+        .video-container {
+            background: linear-gradient(45deg, rgba(0, 245, 255, 0.1), rgba(124, 58, 237, 0.1));
+            border: 2px solid rgba(0, 245, 255, 0.2);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .video-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0, 245, 255, 0.1), transparent);
+            animation: scan 3s infinite;
+            z-index: 1;
+        }
+        
+        @keyframes scan {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .neon-button {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+        
+        .neon-button:hover {
+            box-shadow: 0 0 30px rgba(0, 245, 255, 0.6);
+            transform: scale(1.05);
+        }
+        
+        .status-dot {
+            background: var(--accent);
+            box-shadow: 0 0 15px var(--accent);
+            animation: pulse-glow 2s infinite;
+        }
+        
+        @keyframes pulse-glow {
+            0%, 100% { 
+                opacity: 1;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.7;
+                transform: scale(1.1);
+            }
+        }
+        
+        .feature-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .feature-card:hover {
+            background: rgba(0, 245, 255, 0.05);
+            border-color: rgba(0, 245, 255, 0.2);
+            transform: translateX(10px) translateY(-5px);
+        }
+        
+        .glow-text {
+            text-shadow: 0 0 20px rgba(0, 245, 255, 0.5);
+        }
+        
+        .control-overlay {
+            background: linear-gradient(to top, rgba(0, 0, 0, 0.8) 0%, transparent 60%);
+            opacity: 0;
+            transition: all 0.3s ease;
+        }
+        
+        .video-container:hover .control-overlay {
+            opacity: 1;
+        }
+        
+        .control-btn {
+            background: rgba(0, 245, 255, 0.2);
+            border: 1px solid rgba(0, 245, 255, 0.4);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .control-btn:hover {
+            background: rgba(0, 245, 255, 0.4);
+            transform: scale(1.1);
+            box-shadow: 0 0 20px rgba(0, 245, 255, 0.4);
+        }
+        
+        .metric-card {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .ai-indicator {
+            background: linear-gradient(45deg, #ff6b35, #f7931e);
+            animation: ai-pulse 1.5s infinite;
+        }
+        
+        @keyframes ai-pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
+        }
+        
+        .step-number {
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            font-weight: bold;
+        }
+        
+        .floating-particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: rgba(0, 245, 255, 0.6);
+            border-radius: 50%;
+            animation: float 6s infinite linear;
+        }
+        
+        @keyframes float {
+            0% { 
+                transform: translateY(100vh) translateX(0px);
+                opacity: 0;
+            }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { 
+                transform: translateY(-10px) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        .scrollbar-hide::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .nav-link {
+            color: rgba(255, 255, 255, 0.7);
+            transition: all 0.3s ease;
+        }
+        
+        .nav-link:hover {
+            color: var(--primary);
+            text-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+        }
+
+        /* Quality slider styling */
+        #quality-slider {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            cursor: pointer;
+        }
+        
+        #quality-slider::-webkit-slider-thumb {
+            appearance: none;
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            cursor: pointer;
+            box-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+        }
+        
+        #quality-slider::-moz-range-thumb {
+            width: 16px;
+            height: 16px;
+            border-radius: 50%;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            cursor: pointer;
+            border: none;
+            box-shadow: 0 0 10px rgba(0, 245, 255, 0.5);
+        }
+
+        /* Stream control buttons */
+        .stream-control {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+        
+        .stream-control:hover {
+            background: rgba(0, 245, 255, 0.2);
+            border-color: rgba(0, 245, 255, 0.4);
+            transform: scale(1.05);
+        }
+
+        .notifications-container {
+            position: relative;
+        }
+
+        .notifications-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            width: 320px;
+            max-height: 400px;
+            overflow-y: auto;
+            background: rgba(0, 0, 0, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            display: none;
+        }
+
+        .notifications-dropdown.show {
+            display: block;
+        }
+
+        .notification-item {
+            padding: 12px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            transition: all 0.3s ease;
+        }
+
+        .notification-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .notification-item:last-child {
+            border-bottom: none;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 6px;
+        }
+
+        .notification-time {
+            font-size: 10px;
+            color: rgba(255, 255, 255, 0.5);
+        }
+
+        .notification-badge {
+            background: #ef4444;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            font-weight: bold;
+            position: absolute;
+            top: -8px;
+            right: -8px;
+        }
+
+        .notification-success { border-left: 3px solid #10b981; }
+        .notification-info { border-left: 3px solid #3b82f6; }
+        .notification-warning { border-left: 3px solid #f59e0b; }
+        .notification-error { border-left: 3px solid #ef4444; }
+
+        /* User Menu Styles */
+        .user-menu {
+            position: relative;
+        }
+        
+        .user-dropdown {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            min-width: 200px;
+            background: rgba(30, 27, 58, 0.95);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            z-index: 1000;
+            display: none;
+            margin-top: 8px;
+        }
+
+        .user-dropdown.show {
+            display: block;
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            text-decoration: none;
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 14px;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .dropdown-item:hover {
+            background: rgba(255, 255, 255, 0.05);
+            color: #00f5ff;
+        }
+
+        .dropdown-item:last-child {
+            border-bottom: none;
+        }
+
+        .dropdown-item i {
+            width: 16px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body class="text-white">
+    <!-- Floating particles background -->
+    <div class="fixed inset-0 pointer-events-none">
+        <div class="floating-particle" style="left: 10%; animation-delay: 0s;"></div>
+        <div class="floating-particle" style="left: 20%; animation-delay: 1s;"></div>
+        <div class="floating-particle" style="left: 30%; animation-delay: 2s;"></div>
+        <div class="floating-particle" style="left: 40%; animation-delay: 3s;"></div>
+        <div class="floating-particle" style="left: 50%; animation-delay: 4s;"></div>
+        <div class="floating-particle" style="left: 60%; animation-delay: 5s;"></div>
+    </div>
+
+    <!-- Navigation -->
+    <nav class="fixed top-0 w-full z-50 glass-card border-b border-white/10">
+        <div class="container mx-auto px-6 py-4 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-r from-cyan-400 to-purple-600 flex items-center justify-center">
+                    <i class="fas fa-baby text-white text-lg"></i>
+                </div>
+                <span class="text-xl font-bold glow-text">AI Baby Monitor</span>
+                <small class="text-xs text-cyan-400 ml-2">by CodePerfectPlus</small>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="notifications-container">
+                    <button class="nav-link relative" onclick="toggleNotifications()">
+                        <i class="fas fa-bell mr-2"></i>Notifications
+                        <span id="notification-badge" class="notification-badge" style="display: none;">0</span>
+                    </button>
+                    <div id="notifications-dropdown" class="notifications-dropdown">
+                        <div class="p-3 border-b border-white/10 flex justify-between items-center">
+                            <h3 class="font-semibold text-white">Recent Notifications</h3>
+                            <button onclick="clearAllNotifications()" class="text-xs text-red-400 hover:text-red-300">
+                                Clear All
+                            </button>
+                        </div>
+                        <div id="notifications-list" class="max-h-64 overflow-y-auto">
+                            <div class="p-4 text-center text-gray-400 text-sm">
+                                No notifications yet
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- User Menu -->
+                <div class="relative user-menu">
+                    <button class="nav-link flex items-center" onclick="toggleUserMenu()">
+                        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white font-medium mr-2">
+                            {{ current_user.username[0].upper() }}
+                        </div>
+                        <span>{{ current_user.username }}</span>
+                        <i class="fas fa-chevron-down ml-2 text-xs"></i>
+                    </button>
+                    <div id="user-dropdown" class="user-dropdown">
+                        <div class="p-3 border-b border-white/10">
+                            <p class="text-white font-medium">{{ current_user.username }}</p>
+                            <p class="text-gray-400 text-sm">{{ current_user.email }}</p>
+                        </div>
+                        {% if current_user.is_admin %}
+                        <a href="{{ url_for('auth.user_management') }}" class="dropdown-item">
+                            <i class="fas fa-users mr-2"></i>User Management
+                        </a>
+                        <a href="{{ url_for('auth.login_logs') }}" class="dropdown-item">
+                            <i class="fas fa-history mr-2"></i>Login Logs
+                        </a>
+                        {% endif %}
+                        <a href="{{ url_for('auth.change_password') }}" class="dropdown-item">
+                            <i class="fas fa-key mr-2"></i>Change Password
+                        </a>
+                        <div class="border-t border-white/10"></div>
+                        <a href="{{ url_for('auth.logout') }}" class="dropdown-item text-red-400 hover:text-red-300">
+                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mx-auto px-6 pt-24 pb-12">
+        <!-- Header Section -->
+        <div class="text-center mb-12">
+            <h1 class="text-6xl font-extrabold mb-4">
+                <span class="bg-gradient-to-r from-cyan-400 via-purple-500 to-pink-500 bg-clip-text text-transparent">
+                    AI-Powered Baby Monitor
+                </span>
+            </h1>
+            <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+                Advanced real-time monitoring with computer vision, sleep analysis, and intelligent safety alerts
+            </p>
+            
+            <!-- Status Bar -->
+            <div class="flex items-center justify-center gap-8 mb-8">
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full status-dot"></div>
+                    <span class="text-green-400 font-medium">Live Stream Active</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="ai-indicator w-3 h-3 rounded-full"></div>
+                    <span class="text-orange-400 font-medium">AI Processing</span>
+                </div>
+                <div class="flex items-center gap-2">
+                    <div class="w-3 h-3 rounded-full bg-blue-500"></div>
+                    <span class="text-blue-400 font-medium">Safe Zone OK</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+            <!-- Video Section -->
+            <div class="xl:col-span-3">
+                <div class="glass-card rounded-3xl p-6 mb-6">
+                    <!-- Live Metrics -->
+                    <div class="grid grid-cols-4 gap-4 mb-6">
+                        <div class="metric-card rounded-xl p-4 text-center">
+                            <div class="text-2xl font-bold text-cyan-400" id="detection-rate">98%</div>
+                            <div class="text-sm text-gray-400">Detection Rate</div>
+                        </div>
+                        <div class="metric-card rounded-xl p-4 text-center">
+                            <div class="text-2xl font-bold text-green-400" id="sleep-state">Sleep</div>
+                            <div class="text-sm text-gray-400">State</div>
+                        </div>
+                        <div class="metric-card rounded-xl p-4 text-center">
+                            <div class="text-2xl font-bold text-purple-400" id="room-temp">24°C</div>
+                            <div class="text-sm text-gray-400">Room Temp</div>
+                        </div>
+                        <div class="metric-card rounded-xl p-4 text-center">
+                            <div class="text-2xl font-bold text-yellow-400" id="sleep-time">2h 15m</div>
+                            <div class="text-sm text-gray-400">Sleep Time</div>
+                        </div>
+                    </div>
+                    
+                    <!-- Stream Control Panel -->
+                    <div class="glass-card rounded-2xl p-6 mb-6">
+                        <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+                            <div class="flex items-center gap-4">
+                                <div id="connection-status" class="flex items-center gap-2">
+                                    <div id="status-dot" class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                                    <span id="status-text" class="text-white font-medium">Connecting...</span>
+                                </div>
+                                <div class="text-sm text-gray-400">
+                                    Protocol: <span class="text-cyan-400 font-medium">WebSocket</span>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col lg:flex-row items-start lg:items-center gap-4">
+                                <div class="flex items-center gap-4 text-sm text-gray-400">
+                                    <div>Clients: <span id="client-count" class="text-cyan-400 font-medium">0</span></div>
+                                    <div>FPS: <span id="current-fps" class="text-green-400 font-medium">0</span></div>
+                                    <div>Quality: <span id="current-quality" class="text-yellow-400 font-medium">80</span>%</div>
+                                </div>
+                                
+                                <div class="flex items-center gap-2">
+                                    <label class="text-sm text-gray-400">Quality:</label>
+                                    <input type="range" id="quality-slider" min="30" max="100" value="80" step="10" 
+                                           class="w-20 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                                    <span id="quality-value" class="text-sm text-white">80%</span>
+                                    <button id="apply-quality" class="neon-button px-3 py-1 rounded text-xs font-medium">Apply</button>
+                                </div>
+                                
+                                <div class="flex items-center gap-2">
+                                    <button id="pause-resume" class="control-btn px-3 py-1 rounded-full text-sm">
+                                        <i class="fas fa-pause"></i> Pause
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Video Container -->
+                    <div class="video-container rounded-2xl aspect-video relative group">
+                        <img id="video-stream" alt="Live AI Baby Monitor Stream" class="w-full h-full object-cover rounded-2xl" 
+                             src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" />
+                        
+                        <!-- Stream Info Overlay -->
+                        <div class="absolute top-4 right-4 flex gap-2">
+                            <div id="live-status" class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2" style="display: none;">
+                                <div id="live-indicator" class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+                                <span class="text-red-400 font-medium">LIVE</span>
+                            </div>
+                            <div id="ai-status" class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2" style="display: none;">
+                                <i class="fas fa-robot text-cyan-400"></i>
+                                <span class="text-cyan-400 font-medium">AI Active</span>
+                            </div>
+                            <div class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                                <i class="fas fa-wifi text-green-400"></i>
+                                <span class="text-green-400 font-medium" id="stream-fps">-- FPS</span>
+                            </div>
+                            <div id="sleep-status-indicator" class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                                <i id="sleep-status-icon" class="fas fa-moon text-gray-400"></i>
+                                <span id="sleep-status-text" class="text-gray-400 font-medium">--</span>
+                            </div>
+                        </div>
+                        
+                        <!-- Controls Overlay -->
+                        <div class="absolute inset-0 control-overlay rounded-2xl">
+                            <div class="absolute bottom-6 left-6 flex gap-3">
+                                <button class="control-btn p-3 rounded-full" onclick="takeSnapshot()" title="Snapshot">
+                                    <i class="fas fa-camera text-white"></i>
+                                </button>
+                                <button class="control-btn p-3 rounded-full" onclick="toggleFullscreen()" title="Fullscreen">
+                                    <i class="fas fa-expand text-white"></i>
+                                </button>
+                                <button id="clear-child-btn" class="control-btn p-3 rounded-full" onclick="clearChildSelection()" title="Clear Child Selection">
+                                    <i class="fas fa-times text-white"></i>
+                                </button>
+                            </div>
+                            
+                            <div class="absolute bottom-6 right-6">
+                                <div id="child-status" class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2 mb-2" style="display: none;">
+                                    <i class="fas fa-child text-green-400"></i>
+                                    <span class="text-green-400 font-medium">Child: <span id="child-id">--</span></span>
+                                </div>
+                                <div class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2 mb-2">
+                                    <i class="fas fa-mouse-pointer text-cyan-400"></i>
+                                    <span class="text-cyan-400 font-medium">Click to Select Child</span>
+                                </div>
+                                <div class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2">
+                                    <i class="fas fa-keyboard text-yellow-400"></i>
+                                    <span class="text-yellow-400 font-medium">Press H for shortcuts</span>
+                                </div>
+                            </div>
+                            
+                            <!-- <div class="absolute top-6 right-6 flex gap-2">
+                                <button class="control-btn px-4 py-2 rounded-full flex items-center gap-2" title="Sleep Monitor">
+                                    <i class="fas fa-bed text-white"></i>
+                                    <span class="text-white text-sm">Sleep Monitor</span>
+                                </button>
+                                <button id="shortcuts-help-btn" class="control-btn px-4 py-2 rounded-full flex items-center gap-2" onclick="toggleShortcutsHelp()" title="Keyboard Shortcuts">
+                                    <i class="fas fa-keyboard text-white"></i>
+                                    <span class="text-white text-sm">Help</span>
+                                </button>
+                            </div> -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="grid grid-cols-3 gap-4">
+                    <button class="glass-card rounded-xl p-6 text-center hover:bg-green-500/10 transition-all duration-300 group">
+                        <i class="fas fa-shield-alt text-3xl text-green-400 mb-3 group-hover:scale-110 transition-transform"></i>
+                        <div class="font-semibold text-green-400">Safety Check</div>
+                        <div class="text-sm text-gray-400">Run safety analysis</div>
+                    </button>
+                    <button class="glass-card rounded-xl p-6 text-center hover:bg-blue-500/10 transition-all duration-300 group">
+                        <i class="fas fa-chart-area text-3xl text-blue-400 mb-3 group-hover:scale-110 transition-transform"></i>
+                        <div class="font-semibold text-blue-400">Sleep Report</div>
+                        <div class="text-sm text-gray-400">View sleep analytics</div>
+                    </button>
+                    <button class="glass-card rounded-xl p-6 text-center hover:bg-purple-500/10 transition-all duration-300 group">
+                        <i class="fas fa-bell text-3xl text-purple-400 mb-3 group-hover:scale-110 transition-transform"></i>
+                        <div class="font-semibold text-purple-400">Alerts</div>
+                        <div class="text-sm text-gray-400">Configure notifications</div>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="xl:col-span-1">
+                <div class="sticky top-28 space-y-6 scrollbar-hide max-h-screen overflow-y-auto">
+                    <!-- AI Features -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                            <i class="fas fa-magic text-cyan-400"></i>
+                            AI Features
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="feature-card rounded-xl p-4">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <i class="fas fa-eye text-green-400"></i>
+                                    <span class="font-semibold">Child Detection</span>
+                                </div>
+                                <p class="text-sm text-gray-400">YOLOv8 + DeepSORT tracking</p>
+                            </div>
+                            <div class="feature-card rounded-xl p-4">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <i class="fas fa-bed text-blue-400"></i>
+                                    <span class="font-semibold">Sleep Analysis</span>
+                                </div>
+                                <p class="text-sm text-gray-400">Real-time sleep monitoring</p>
+                            </div>
+                            <div class="feature-card rounded-xl p-4">
+                                <div class="flex items-center gap-3 mb-2">
+                                    <i class="fas fa-exclamation-triangle text-red-400"></i>
+                                    <span class="font-semibold">Safety Alerts</span>
+                                </div>
+                                <p class="text-sm text-gray-400">Fall & zone breach detection</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Status -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                            <i class="fas fa-heartbeat text-pink-400"></i>
+                            System Status
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-300">CPU Usage</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-20 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        <div class="w-3/4 h-full bg-gradient-to-r from-green-400 to-yellow-400" id="cpu-bar"></div>
+                                    </div>
+                                    <span class="text-sm text-green-400" id="cpu-value">75%</span>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-300">Memory</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-20 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        <div class="w-1/2 h-full bg-gradient-to-r from-blue-400 to-purple-400" id="memory-bar"></div>
+                                    </div>
+                                    <span class="text-sm text-blue-400" id="memory-value">50%</span>
+                                </div>
+                            </div>
+                            <div class="flex justify-between items-center">
+                                <span class="text-gray-300">Network</span>
+                                <div class="flex items-center gap-2">
+                                    <div class="w-20 h-2 bg-gray-700 rounded-full overflow-hidden">
+                                        <div class="w-4/5 h-full bg-gradient-to-r from-cyan-400 to-blue-400" id="network-bar"></div>
+                                    </div>
+                                    <span class="text-sm text-cyan-400" id="network-value">80%</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Setup -->
+                    <div class="glass-card rounded-2xl p-6">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                            <i class="fas fa-rocket text-green-400"></i>
+                            Quick Setup
+                        </h3>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3 p-2">
+                                <div class="step-number w-6 h-6 rounded-full flex items-center justify-center text-xs">1</div>
+                                <span class="text-sm text-gray-300">Configure RTSP stream</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-2">
+                                <div class="step-number w-6 h-6 rounded-full flex items-center justify-center text-xs">2</div>
+                                <span class="text-sm text-gray-300">Set safety zones</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-2">
+                                <div class="step-number w-6 h-6 rounded-full flex items-center justify-center text-xs">3</div>
+                                <span class="text-sm text-gray-300">Enable AI monitoring</span>
+                            </div>
+                            <div class="flex items-center gap-3 p-2">
+                                <div class="step-number w-6 h-6 rounded-full flex items-center justify-center text-xs">4</div>
+                                <span class="text-sm text-gray-300">Start monitoring</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Footer -->
+                    <div class="glass-card rounded-2xl p-4 text-center">
+                        <div class="text-sm text-gray-400 flex items-center justify-center gap-2">
+                            <span>Built with</span>
+                            <i class="fas fa-heart text-red-400 animate-pulse"></i>
+                            <span>by</span>
+                            <a href="#" class="text-cyan-400 hover:text-cyan-300 font-medium">CodePerfectPlus</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Keyboard Shortcuts Help Modal -->
+    <div id="shortcuts-modal" class="fixed inset-0 bg-black bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50" style="display: none;">
+        <div class="glass-card rounded-2xl p-8 max-w-lg w-full mx-4">
+            <div class="flex justify-between items-center mb-6">
+                <h3 class="text-2xl font-bold text-white flex items-center gap-2">
+                    <i class="fas fa-keyboard text-cyan-400"></i>
+                    Keyboard Shortcuts
+                </h3>
+                <button onclick="toggleShortcutsHelp()" class="text-gray-400 hover:text-white text-2xl">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="space-y-3">
+                <div class="flex justify-between items-center py-2 px-4 rounded-lg bg-white bg-opacity-5">
+                    <div class="flex items-center gap-3">
+                        <kbd class="px-2 py-1 bg-gray-700 text-white rounded text-sm font-mono">Q</kbd>
+                        <span class="text-white font-medium">Quality Toggle</span>
+                    </div>
+                    <span class="text-gray-400 text-sm">Switch between high/low quality</span>
+                </div>
+                
+                <div class="flex justify-between items-center py-2 px-4 rounded-lg bg-white bg-opacity-5">
+                    <div class="flex items-center gap-3">
+                        <kbd class="px-2 py-1 bg-gray-700 text-white rounded text-sm font-mono">P</kbd>
+                        <span class="text-white font-medium">Pause/Resume</span>
+                    </div>
+                    <span class="text-gray-400 text-sm">Toggle stream pause</span>
+                </div>
+                
+                <div class="flex justify-between items-center py-2 px-4 rounded-lg bg-white bg-opacity-5">
+                    <div class="flex items-center gap-3">
+                        <kbd class="px-2 py-1 bg-gray-700 text-white rounded text-sm font-mono">S</kbd>
+                        <span class="text-white font-medium">Snapshot</span>
+                    </div>
+                    <span class="text-gray-400 text-sm">Capture instant photo</span>
+                </div>
+                
+                <div class="flex justify-between items-center py-2 px-4 rounded-lg bg-white bg-opacity-5">
+                    <div class="flex items-center gap-3">
+                        <kbd class="px-2 py-1 bg-gray-700 text-white rounded text-sm font-mono">R</kbd>
+                        <span class="text-white font-medium">Raw/Annotated</span>
+                    </div>
+                    <span class="text-gray-400 text-sm">Toggle recording mode</span>
+                </div>
+                
+                <div class="flex justify-between items-center py-2 px-4 rounded-lg bg-white bg-opacity-5">
+                    <div class="flex items-center gap-3">
+                        <kbd class="px-2 py-1 bg-gray-700 text-white rounded text-sm font-mono">C</kbd>
+                        <span class="text-white font-medium">Clear Selection</span>
+                    </div>
+                    <span class="text-gray-400 text-sm">Reset child selection</span>
+                </div>
+                
+                <div class="flex justify-between items-center py-2 px-4 rounded-lg bg-white bg-opacity-5">
+                    <div class="flex items-center gap-3">
+                        <kbd class="px-2 py-1 bg-gray-700 text-white rounded text-sm font-mono">Z</kbd>
+                        <span class="text-white font-medium">Sleep Detection</span>
+                    </div>
+                    <span class="text-gray-400 text-sm">Toggle sleep monitoring</span>
+                </div>
+                
+                <div class="flex justify-between items-center py-2 px-4 rounded-lg bg-white bg-opacity-5">
+                    <div class="flex items-center gap-3">
+                        <kbd class="px-2 py-1 bg-gray-700 text-white rounded text-sm font-mono">F</kbd>
+                        <span class="text-white font-medium">Fullscreen</span>
+                    </div>
+                    <span class="text-gray-400 text-sm">Toggle fullscreen mode</span>
+                </div>
+                
+                <div class="flex justify-between items-center py-2 px-4 rounded-lg bg-white bg-opacity-5">
+                    <div class="flex items-center gap-3">
+                        <kbd class="px-2 py-1 bg-gray-700 text-white rounded text-sm font-mono">H</kbd>
+                        <span class="text-white font-medium">Help</span>
+                    </div>
+                    <span class="text-gray-400 text-sm">Show/hide this help panel</span>
+                </div>
+            </div>
+            
+            <div class="mt-6 p-4 bg-cyan-500 bg-opacity-10 border border-cyan-500 border-opacity-20 rounded-lg">
+                <div class="flex items-center gap-2 text-cyan-400 mb-2">
+                    <i class="fas fa-info-circle"></i>
+                    <span class="font-medium">Pro Tip</span>
+                </div>
+                <p class="text-sm text-gray-300">Click anywhere on the video to manually select a child for tracking. Use the clear button to reset selection.</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // WebSocket connection
+        const socket = io();
+        let streamActive = true;
+        let frameCount = 0;
+        let lastFrameTime = Date.now();
+        
+        // DOM elements
+        const videoStream = document.getElementById('video-stream');
+        const statusDot = document.getElementById('status-dot');
+        const statusText = document.getElementById('status-text');
+        const clientCount = document.getElementById('client-count');
+        const currentFps = document.getElementById('current-fps');
+        const currentQuality = document.getElementById('current-quality');
+        const streamFps = document.getElementById('stream-fps');
+        const qualitySlider = document.getElementById('quality-slider');
+        const qualityValue = document.getElementById('quality-value');
+        const applyQuality = document.getElementById('apply-quality');
+        const pauseResumeBtn = document.getElementById('pause-resume');
+        const liveIndicator = document.getElementById('live-indicator');
+        
+        // WebSocket event handlers
+        socket.on('connect', function() {
+            console.log('Connected to WebSocket');
+            statusDot.className = 'w-3 h-3 bg-green-500 rounded-full';
+            statusText.textContent = 'Connected';
+            liveIndicator.className = 'w-2 h-2 bg-green-500 rounded-full animate-pulse';
+            
+            // Show live and AI status indicators
+            document.getElementById('live-status').style.display = 'flex';
+            document.getElementById('ai-status').style.display = 'flex';
+            
+            showNotification('WebSocket connected successfully!', 'success');
+        });
+        
+        socket.on('disconnect', function() {
+            console.log('Disconnected from WebSocket');
+            statusDot.className = 'w-3 h-3 bg-red-500 rounded-full animate-pulse';
+            statusText.textContent = 'Disconnected';
+            liveIndicator.className = 'w-2 h-2 bg-red-500 rounded-full animate-pulse';
+            
+            // Hide live and AI status indicators when disconnected
+            document.getElementById('live-status').style.display = 'none';
+            document.getElementById('ai-status').style.display = 'none';
+            
+            streamActive = false;
+            showNotification('WebSocket disconnected', 'error');
+        });
+        
+        socket.on('connection_status', function(data) {
+            clientCount.textContent = data.client_count;
+            console.log('Connection status:', data);
+        });
+        
+        socket.on('video_frame', function(data) {
+            if (streamActive && data.frame) {
+                videoStream.src = 'data:image/jpeg;base64,' + data.frame;
+                
+                // Calculate and display FPS
+                frameCount++;
+                const now = Date.now();
+                if (now - lastFrameTime >= 1000) {
+                    const fps = Math.round(frameCount * 1000 / (now - lastFrameTime));
+                    currentFps.textContent = fps;
+                    streamFps.textContent = fps + ' FPS';
+                    frameCount = 0;
+                    lastFrameTime = now;
+                }
+            }
+        });
+        
+        socket.on('quality_changed', function(data) {
+            currentQuality.textContent = data.quality;
+            qualitySlider.value = data.quality;
+            qualityValue.textContent = data.quality + '%';
+            showNotification(`Quality updated to ${data.quality}%`, 'success');
+        });
+        
+        // Child selection WebSocket handlers
+        socket.on('child_select_response', function(data) {
+            if (data.success) {
+                showNotification(data.message, 'success');
+                requestChildStatus(); // Update child status
+            }
+        });
+        
+        socket.on('child_select_error', function(data) {
+            showNotification(`Child selection failed: ${data.message}`, 'error');
+        });
+        
+        socket.on('child_clear_response', function(data) {
+            if (data.success) {
+                showNotification('Child selection cleared', 'success');
+                updateChildStatus(null); // Clear child status display
+            }
+        });
+        
+        socket.on('child_clear_error', function(data) {
+            showNotification(`Failed to clear selection: ${data.message}`, 'error');
+        });
+        
+        socket.on('child_status', function(data) {
+            updateChildStatus(data);
+        });
+        
+        socket.on('child_status_error', function(data) {
+            console.error('Child status error:', data.message);
+        });
+        
+        // Control event handlers
+        qualitySlider.addEventListener('input', function() {
+            qualityValue.textContent = this.value + '%';
+        });
+        
+        applyQuality.addEventListener('click', function() {
+            const quality = parseInt(qualitySlider.value);
+            socket.emit('request_quality_change', {quality: quality});
+            showNotification('Applying quality change...', 'info');
+        });
+        
+        pauseResumeBtn.addEventListener('click', function() {
+            streamActive = !streamActive;
+            const icon = this.querySelector('i');
+            const text = this.querySelector('span') || this;
+            
+            if (streamActive) {
+                icon.className = 'fas fa-pause';
+                text.innerHTML = '<i class="fas fa-pause"></i> Pause';
+                liveIndicator.className = 'w-2 h-2 bg-green-500 rounded-full animate-pulse';
+                showNotification('Stream resumed', 'success');
+            } else {
+                icon.className = 'fas fa-play';
+                text.innerHTML = '<i class="fas fa-play"></i> Resume';
+                liveIndicator.className = 'w-2 h-2 bg-gray-500 rounded-full';
+                videoStream.src = 'data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7';
+                showNotification('Stream paused', 'warning');
+            }
+        });
+
+        // Fullscreen functionality
+        function toggleFullscreen() {
+            const videoContainer = document.querySelector('.video-container');
+            if (!document.fullscreenElement) {
+                videoContainer.requestFullscreen().catch(err => {
+                    console.log(`Error attempting to enable fullscreen: ${err.message}`);
+                });
+            } else {
+                document.exitFullscreen();
+            }
+        }
+
+        // Snapshot functionality
+        function takeSnapshot() {
+            fetch('/snapshot', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Snapshot saved successfully!', 'success');
+                } else {
+                    showNotification(data.message || 'Failed to save snapshot', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error taking snapshot:', error);
+                showNotification('Failed to save snapshot', 'error');
+            });
+        }
+        
+        // Child selection functions
+        function clearChildSelection() {
+            socket.emit('child_clear');
+        }
+        
+        function updateChildStatus(data) {
+            const childStatus = document.getElementById('child-status');
+            const childIdSpan = document.getElementById('child-id');
+            
+            if (data && data.selected) {
+                childIdSpan.textContent = `ID ${data.child_id} (${Math.round(data.confidence * 100)}%)`;
+                childStatus.style.display = 'flex';
+            } else {
+                childStatus.style.display = 'none';
+            }
+        }
+        
+        function requestChildStatus() {
+            socket.emit('child_status_request');
+        }
+        
+        // Add click-to-select functionality to video
+        videoStream.addEventListener('click', function(event) {
+            if (!streamActive) return;
+            
+            const rect = this.getBoundingClientRect();
+            const scaleX = this.naturalWidth / rect.width;
+            const scaleY = this.naturalHeight / rect.height;
+            
+            const x = Math.round((event.clientX - rect.left) * scaleX);
+            const y = Math.round((event.clientY - rect.top) * scaleY);
+            
+            console.log(`Selecting child at coordinates: ${x}, ${y}`);
+            socket.emit('child_select', { x: x, y: y });
+            
+            // Visual feedback - show click effect
+            const clickEffect = document.createElement('div');
+            clickEffect.className = 'absolute w-4 h-4 border-2 border-cyan-400 rounded-full animate-ping pointer-events-none';
+            clickEffect.style.left = (event.clientX - rect.left - 8) + 'px';
+            clickEffect.style.top = (event.clientY - rect.top - 8) + 'px';
+            
+            this.parentElement.appendChild(clickEffect);
+            setTimeout(() => clickEffect.remove(), 1000);
+        });
+        
+        // Keyboard shortcuts
+        document.addEventListener('keydown', function(event) {
+            if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') return;
+            
+            switch(event.key.toLowerCase()) {
+                case 's':
+                    event.preventDefault();
+                    takeSnapshot();
+                    showNotification('Snapshot taken!', 'success');
+                    break;
+                case 'p':
+                    event.preventDefault();
+                    pauseResumeBtn.click();
+                    break;
+                case 'f':
+                    event.preventDefault();
+                    toggleFullscreen();
+                    break;
+                case 'q':
+                    event.preventDefault();
+                    // Toggle quality between high and low
+                    const currentQual = parseInt(qualitySlider.value);
+                    qualitySlider.value = currentQual > 50 ? 30 : 100;
+                    qualityValue.textContent = qualitySlider.value + '%';
+                    applyQuality.click();
+                    showNotification(`Quality switched to ${qualitySlider.value}%`, 'info');
+                    break;
+                case 'c':
+                    event.preventDefault();
+                    clearChildSelection();
+                    showNotification('Child selection cleared', 'info');
+                    break;
+                case 'r':
+                    event.preventDefault();
+                    toggleRecordingMode();
+                    break;
+                case 'z':
+                    event.preventDefault();
+                    toggleSleepDetection();
+                    break;
+                case 'h':
+                    event.preventDefault();
+                    toggleShortcutsHelp();
+                    break;
+            }
+        });
+
+        // Show notification function
+        function showNotification(message, type) {
+            const notification = document.createElement('div');
+            notification.className = `fixed top-28 right-6 glass-card rounded-lg p-4 z-50 transform translate-x-full transition-transform duration-300`;
+            
+            const colors = {
+                success: 'text-green-400 border-green-400/20',
+                info: 'text-blue-400 border-blue-400/20',
+                warning: 'text-yellow-400 border-yellow-400/20',
+                error: 'text-red-400 border-red-400/20'
+            };
+            
+            const icons = {
+                success: 'fa-check-circle',
+                info: 'fa-info-circle',
+                warning: 'fa-exclamation-triangle',
+                error: 'fa-times-circle'
+            };
+            
+            notification.className += ` ${colors[type]}`;
+            notification.innerHTML = `
+                <div class="flex items-center gap-2">
+                    <i class="fas ${icons[type]}"></i>
+                    <span>${message}</span>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(0)';
+            }, 100);
+            
+            setTimeout(() => {
+                notification.style.transform = 'translateX(100%)';
+                setTimeout(() => notification.remove(), 300);
+            }, 3000);
+        }
+
+        // Add some interactive feedback
+        document.querySelectorAll('.control-btn, .neon-button').forEach(btn => {
+            btn.addEventListener('click', function() {
+                this.style.transform = 'scale(0.95)';
+                setTimeout(() => {
+                    this.style.transform = '';
+                }, 150);
+            });
+        });
+
+        // Update metrics with streaming info
+        function updateMetrics() {
+            fetch('/metrics')
+                .then(response => response.json())
+                .then(data => {
+                    // Live Metrics
+                    document.getElementById('detection-rate').textContent = data.detection_rate + '%';
+                    
+                    // Update sleep state with appropriate color
+                    const sleepStateElement = document.getElementById('sleep-state');
+                    sleepStateElement.textContent = data.sleep_state;
+                    
+                    // Update sleep status indicator in video overlay
+                    const sleepStatusIcon = document.getElementById('sleep-status-icon');
+                    const sleepStatusText = document.getElementById('sleep-status-text');
+                    
+                    if (sleepStatusIcon && sleepStatusText) {
+                        sleepStatusText.textContent = data.sleep_state;
+                        
+                        // Remove all existing classes
+                        sleepStatusIcon.className = 'fas';
+                        sleepStatusText.className = 'font-medium';
+                        
+                        // Apply appropriate icon and color based on state
+                        switch(data.sleep_state) {
+                            case 'Sleep':
+                            case 'SLEEPING':
+                                sleepStatusIcon.className += ' fa-bed text-blue-400';
+                                sleepStatusText.className += ' text-blue-400';
+                                break;
+                            case 'Awake':
+                            case 'AWAKE':
+                            case 'ACTIVE':
+                                sleepStatusIcon.className += ' fa-eye text-green-400';
+                                sleepStatusText.className += ' text-green-400';
+                                break;
+                            case 'No child':
+                            case 'NO_CHILD':
+                                sleepStatusIcon.className += ' fa-user-slash text-gray-400';
+                                sleepStatusText.className += ' text-gray-400';
+                                sleepStatusText.textContent = 'No Child';
+                                break;
+                            case 'Disabled':
+                            case 'DISABLED':
+                                sleepStatusIcon.className += ' fa-moon-o text-red-400';
+                                sleepStatusText.className += ' text-red-400';
+                                break;
+                            default:
+                                sleepStatusIcon.className += ' fa-question text-orange-400';
+                                sleepStatusText.className += ' text-orange-400';
+                                break;
+                        }
+                    }
+                    
+                    // Remove all color classes from main sleep state element
+                    sleepStateElement.classList.remove('text-green-400', 'text-blue-400', 'text-gray-400', 'text-orange-400', 'text-red-400');
+                    
+                    // Apply color based on state
+                    switch(data.sleep_state) {
+                        case 'Sleep':
+                            sleepStateElement.classList.add('text-green-400');
+                            break;
+                        case 'Awake':
+                            sleepStateElement.classList.add('text-blue-400');
+                            break;
+                        case 'No child':
+                            sleepStateElement.classList.add('text-gray-400');
+                            break;
+                        case 'Disabled':
+                            sleepStateElement.classList.add('text-red-400');
+                            break;
+                        default:
+                            sleepStateElement.classList.add('text-orange-400');
+                            break;
+                    }
+                    
+                    document.getElementById('room-temp').textContent = data.room_temp + '°C';
+                    document.getElementById('sleep-time').textContent = data.sleep_time;
+
+                    // Update streaming metrics if available
+                    if (data.streaming) {
+                        currentQuality.textContent = data.streaming.adaptive_quality;
+                        if (!streamActive || frameCount === 0) {
+                            // Update server-side FPS if client isn't calculating
+                            streamFps.textContent = data.streaming.adaptive_fps + ' FPS';
+                        }
+                    }
+
+                    // System Status Bars
+                    const cpuBar = document.getElementById('cpu-bar');
+                    const memoryBar = document.getElementById('memory-bar');
+                    const networkBar = document.getElementById('network-bar');
+                    if (cpuBar) {
+                        cpuBar.style.width = Math.max(10, Math.min(100, data.cpu)) + '%';
+                        document.getElementById('cpu-value').textContent = Math.round(data.cpu) + '%';
+                    }
+                    if (memoryBar) {
+                        memoryBar.style.width = Math.max(10, Math.min(100, data.memory)) + '%';
+                        document.getElementById('memory-value').textContent = Math.round(data.memory) + '%';
+                    }
+                    if (networkBar) {
+                        networkBar.style.width = Math.max(10, Math.min(100, data.network)) + '%';
+                        document.getElementById('network-value').textContent = Math.round(data.network) + '%';
+                    }
+                })
+                .catch(error => console.error('Error updating metrics:', error));
+        }
+        
+        setInterval(updateMetrics, 3000);
+        window.onload = updateMetrics;
+
+        // Toggle notifications dropdown
+        function toggleNotifications() {
+            const dropdown = document.getElementById('notifications-dropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+                
+                if (dropdown.classList.contains('show')) {
+                    loadNotificationsList();
+                }
+            }
+        }
+
+        // Toggle user dropdown
+        function toggleUserMenu() {
+            const dropdown = document.getElementById('user-dropdown');
+            if (dropdown) {
+                dropdown.classList.toggle('show');
+            }
+        }
+
+        // Close dropdown when clicking outside (extended to handle user menu)
+        document.addEventListener('click', function(event) {
+            const notificationContainer = document.querySelector('.notifications-container');
+            const userContainer = document.querySelector('.user-menu');
+            
+            if (notificationContainer && !notificationContainer.contains(event.target)) {
+                const dropdown = document.getElementById('notifications-dropdown');
+                if (dropdown) {
+                    dropdown.classList.remove('show');
+                }
+            }
+            
+            if (userContainer && !userContainer.contains(event.target)) {
+                const dropdown = document.getElementById('user-dropdown');
+                if (dropdown) {
+                    dropdown.classList.remove('show');
+                }
+            }
+        });
+        
+        // Load notifications list
+        function loadNotificationsList() {
+            fetch('/notifications')
+                .then(response => response.json())
+                .then(data => {
+                    const list = document.getElementById('notifications-list');
+                    const badge = document.getElementById('notification-badge');
+                    
+                    if (list && badge && data.notifications && data.notifications.length > 0) {
+                        // Update badge
+                        badge.textContent = data.notifications.length;
+                        badge.style.display = data.notifications.length > 0 ? 'flex' : 'none';
+                        
+                        // Populate list
+                        list.innerHTML = data.notifications
+                            .slice(-20) // Last 20 notifications
+                            .reverse() // Most recent first
+                            .map(notification => {
+                                const time = new Date(notification.timestamp).toLocaleTimeString();
+                                return `
+                                    <div class="notification-item notification-${notification.type}">
+                                        <div class="notification-title">${notification.title}</div>
+                                        <div class="notification-message">${notification.message}</div>
+                                        <div class="notification-time">${time}</div>
+                                    </div>
+                                `;
+                            }).join('');
+                    } else if (list) {
+                        if (badge) badge.style.display = 'none';
+                        list.innerHTML = '<div class="p-4 text-center text-gray-400 text-sm">No notifications yet</div>';
+                    }
+                })
+                .catch(error => console.error('Error loading notifications:', error));
+        }
+
+        // Auto-start stream when page loads
+        window.addEventListener('load', function() {
+            console.log('Page loaded, WebSocket should connect automatically');
+            // Show keyboard shortcuts hint
+            setTimeout(() => {
+                showNotification('Press H for shortcuts help. Quick keys: S=Snapshot, P=Pause, F=Fullscreen', 'info');
+            }, 2000);
+            
+            // Request initial child status
+            setTimeout(() => {
+                requestChildStatus();
+            }, 1000);
+        });
+        
+        // Periodically update child status
+        setInterval(requestChildStatus, 2000);
+        
+        // Toggle shortcuts help modal
+        function toggleShortcutsHelp() {
+            const modal = document.getElementById('shortcuts-modal');
+            if (modal.style.display === 'none' || modal.style.display === '') {
+                modal.style.display = 'flex';
+            } else {
+                modal.style.display = 'none';
+            }
+        }
+        
+        // Toggle sleep detection
+        function toggleSleepDetection() {
+            socket.emit('toggle_sleep_detection');
+        }
+        
+        // Toggle recording mode (raw/annotated)
+        function toggleRecordingMode() {
+            socket.emit('toggle_recording_mode');
+        }
+        
+        // Handle sleep detection WebSocket events
+        socket.on('sleep_detection_toggled', function(data) {
+            if (data.success) {
+                const status = data.enabled ? 'enabled' : 'disabled';
+                showNotification(`Sleep detection ${status}`, data.enabled ? 'success' : 'warning');
+                
+                // Update sleep status indicator immediately
+                const sleepStatusIcon = document.getElementById('sleep-status-icon');
+                const sleepStatusText = document.getElementById('sleep-status-text');
+                
+                if (!data.enabled) {
+                    // If disabled, show disabled status
+                    sleepStatusIcon.className = 'fas fa-moon-o text-red-400';
+                    sleepStatusText.className = 'font-medium text-red-400';
+                    sleepStatusText.textContent = 'Disabled';
+                } else {
+                    // If enabled, it will be updated by the next metrics call
+                    sleepStatusIcon.className = 'fas fa-moon text-blue-400';
+                    sleepStatusText.className = 'font-medium text-blue-400';
+                    sleepStatusText.textContent = 'Enabled';
+                }
+            }
+        });
+        
+        socket.on('sleep_detection_error', function(data) {
+            showNotification('Failed to toggle sleep detection: ' + data.message, 'error');
+        });
+        
+        // Handle recording mode WebSocket events
+        socket.on('recording_mode_toggled', function(data) {
+            if (data.success) {
+                const mode = data.annotated ? 'annotated (with AI overlay)' : 'raw (clean video)';
+                showNotification(`Recording mode: ${mode}`, 'info');
+            }
+        });
+        
+        socket.on('recording_mode_error', function(data) {
+            showNotification('Failed to toggle recording mode: ' + data.message, 'error');
+        });
+        
+        // Close modal when clicking outside
+        document.getElementById('shortcuts-modal').addEventListener('click', function(event) {
+            if (event.target === this) {
+                toggleShortcutsHelp();
+            }
+        });
+    </script>
+
+    <script>
+        function clearAllNotifications() {
+            fetch('/notifications/clear', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    loadNotificationsList(); // Refresh the list
+                    showNotification('All notifications cleared', 'success');
+                    window.lastNotificationId = 0; // Reset tracking
+                }
+            })
+            .catch(error => console.error('Error clearing notifications:', error));
+        }
+
+        // Update the existing fetchNotifications to also update the badge
+        const originalFetchNotifications = fetchNotifications;
+        fetchNotifications = function() {
+            originalFetchNotifications();
+            
+            // Also update badge count
+            fetch('/notifications')
+                .then(response => response.json())
+                .then(data => {
+                    const badge = document.getElementById('notification-badge');
+                    if (data.notifications && data.notifications.length > 0) {
+                        badge.textContent = data.notifications.length;
+                        badge.style.display = 'flex';
+                    } else {
+                        badge.style.display = 'none';
+                    }
+                })
+                .catch(error => console.error('Error updating badge:', error));
+        };
+
+        // Poll for notifications every 2 seconds
+        setInterval(fetchNotifications, 2000);
+    </script>
+</body>
+</html>
