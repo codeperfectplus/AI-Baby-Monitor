@@ -85,6 +85,7 @@
                             <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Relationship</th>
                             <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Role</th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Streaming</th>
                             <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Created</th>
                             <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Last Login</th>
                             <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Actions</th>
@@ -135,6 +136,42 @@
                                         <i class="fas fa-user mr-1"></i>User
                                     </span>
                                 {% endif %}
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <div class="flex items-center">
+                                    {% if user.streaming_enabled %}
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-500 bg-opacity-20 text-green-300 border border-green-400">
+                                            <i class="fas fa-video mr-1"></i>Enabled
+                                        </span>
+                                    {% else %}
+                                        <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-500 bg-opacity-20 text-red-300 border border-red-400">
+                                            <i class="fas fa-video-slash mr-1"></i>Disabled
+                                        </span>
+                                    {% endif %}
+                                    <button 
+                                        onclick="toggleStreaming({{ user.id }}, {{ user.streaming_enabled|lower }})"
+                                        class="ml-2 relative inline-flex h-6 w-11 flex-shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 {% if user.streaming_enabled %}bg-cyan-600{% else %}bg-gray-600{% endif %}"
+                                        role="switch"
+                                        aria-checked="{{ user.streaming_enabled|lower }}"
+                                        id="streaming-toggle-{{ user.id }}">
+                                        <span class="sr-only">Toggle streaming</span>
+                                        <span class="pointer-events-none relative inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out {% if user.streaming_enabled %}translate-x-5{% else %}translate-x-0{% endif %}"
+                                              id="streaming-indicator-{{ user.id }}">
+                                            <span class="absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-200 ease-in-out {% if user.streaming_enabled %}opacity-0{% else %}opacity-100{% endif %}"
+                                                  aria-hidden="true" id="streaming-off-{{ user.id }}">
+                                                <svg class="h-3 w-3 text-gray-400" fill="none" viewBox="0 0 12 12">
+                                                    <path d="M4 8l2-2m0 0l2-2M6 6L4 4m2 2l2 2" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                                </svg>
+                                            </span>
+                                            <span class="absolute inset-0 flex h-full w-full items-center justify-center transition-opacity duration-200 ease-in-out {% if user.streaming_enabled %}opacity-100{% else %}opacity-0{% endif %}"
+                                                  aria-hidden="true" id="streaming-on-{{ user.id }}">
+                                                <svg class="h-3 w-3 text-cyan-600" fill="currentColor" viewBox="0 0 12 12">
+                                                    <path d="M3.707 5.293a1 1 0 00-1.414 1.414l1.414-1.414zM5 8l-.707.707a1 1 0 001.414 0L5 8zm4.707-3.293a1 1 0 00-1.414-1.414l1.414 1.414zm-7.414 2l2 2 1.414-1.414-2-2-1.414 1.414zm3.414 2l4-4-1.414-1.414-4 4 1.414 1.414z" />
+                                                </svg>
+                                            </span>
+                                        </span>
+                                    </button>
+                                </div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-400">
                                 {{ user.created_at.strftime('%Y-%m-%d %H:%M') if user.created_at else 'N/A' }}
@@ -224,5 +261,106 @@
             </div>
         </div>
     </div>
+
+    <script>
+        async function toggleStreaming(userId, currentState) {
+            try {
+                const response = await fetch(`/auth/admin/users/${userId}/toggle-streaming`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    }
+                });
+                
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Update toggle switch
+                    const toggle = document.getElementById(`streaming-toggle-${userId}`);
+                    const indicator = document.getElementById(`streaming-indicator-${userId}`);
+                    const onIcon = document.getElementById(`streaming-on-${userId}`);
+                    const offIcon = document.getElementById(`streaming-off-${userId}`);
+                    
+                    if (data.streaming_enabled) {
+                        toggle.classList.remove('bg-gray-600');
+                        toggle.classList.add('bg-cyan-600');
+                        toggle.setAttribute('aria-checked', 'true');
+                        indicator.classList.remove('translate-x-0');
+                        indicator.classList.add('translate-x-5');
+                        onIcon.classList.remove('opacity-0');
+                        onIcon.classList.add('opacity-100');
+                        offIcon.classList.remove('opacity-100');
+                        offIcon.classList.add('opacity-0');
+                    } else {
+                        toggle.classList.remove('bg-cyan-600');
+                        toggle.classList.add('bg-gray-600');
+                        toggle.setAttribute('aria-checked', 'false');
+                        indicator.classList.remove('translate-x-5');
+                        indicator.classList.add('translate-x-0');
+                        onIcon.classList.remove('opacity-100');
+                        onIcon.classList.add('opacity-0');
+                        offIcon.classList.remove('opacity-0');
+                        offIcon.classList.add('opacity-100');
+                    }
+                    
+                    // Update status badge
+                    const statusRow = toggle.closest('td');
+                    const statusSpan = statusRow.querySelector('span');
+                    const statusIcon = statusSpan.querySelector('i');
+                    
+                    if (data.streaming_enabled) {
+                        statusSpan.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-green-500 bg-opacity-20 text-green-300 border border-green-400';
+                        statusIcon.className = 'fas fa-video mr-1';
+                        statusSpan.childNodes[1].textContent = 'Enabled';
+                    } else {
+                        statusSpan.className = 'inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-red-500 bg-opacity-20 text-red-300 border border-red-400';
+                        statusIcon.className = 'fas fa-video-slash mr-1';
+                        statusSpan.childNodes[1].textContent = 'Disabled';
+                    }
+                    
+                    // Show success notification
+                    showNotification(data.message, 'success');
+                } else {
+                    showNotification('Failed to toggle streaming permission', 'error');
+                }
+            } catch (error) {
+                console.error('Error toggling streaming:', error);
+                showNotification('Error occurred while toggling streaming permission', 'error');
+            }
+        }
+        
+        function showNotification(message, type = 'info') {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `fixed top-4 right-4 z-50 px-4 py-3 rounded-lg backdrop-blur-lg transition-all duration-300 transform translate-x-full ${
+                type === 'success' ? 'bg-green-500 bg-opacity-20 border border-green-400 text-green-300' :
+                type === 'error' ? 'bg-red-500 bg-opacity-20 border border-red-400 text-red-300' :
+                'bg-blue-500 bg-opacity-20 border border-blue-400 text-blue-300'
+            }`;
+            
+            notification.innerHTML = `
+                <div class="flex items-center">
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-triangle' : 'info-circle'} mr-2"></i>
+                    <p class="text-sm font-medium">${message}</p>
+                    <button onclick="this.parentElement.parentElement.remove()" class="ml-4 text-current hover:opacity-75">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Animate in
+            setTimeout(() => {
+                notification.classList.remove('translate-x-full');
+            }, 100);
+            
+            // Auto remove after 5 seconds
+            setTimeout(() => {
+                notification.classList.add('translate-x-full');
+                setTimeout(() => notification.remove(), 300);
+            }, 5000);
+        }
+    </script>
 </body>
 </html>

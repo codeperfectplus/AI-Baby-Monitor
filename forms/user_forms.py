@@ -71,6 +71,7 @@ class UserManagementForm(FlaskForm):
                               default='Guardian')
     active = SelectField('Status', choices=[('1', 'Active'), ('0', 'Inactive')], coerce=str)
     is_admin = BooleanField('Admin User')
+    streaming_enabled = BooleanField('Streaming Access', default=True)
     submit = SubmitField('Update User')
 
 class CreateUserForm(FlaskForm):
@@ -88,6 +89,7 @@ class CreateUserForm(FlaskForm):
     ])
     active = BooleanField('Active User', default=False)
     is_admin = BooleanField('Admin User', default=False)
+    streaming_enabled = BooleanField('Streaming Access', default=True)
     submit = SubmitField('Create User')
     
     def validate_username(self, username):

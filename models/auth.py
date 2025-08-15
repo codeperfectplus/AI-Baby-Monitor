@@ -19,6 +19,7 @@ class User(UserMixin, db.Model):
     active = db.Column(db.Boolean, default=False, nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
     first_login = db.Column(db.Boolean, default=True, nullable=False)
+    streaming_enabled = db.Column(db.Boolean, default=True, nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     last_login = db.Column(db.DateTime)
     

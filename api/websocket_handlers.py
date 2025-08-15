@@ -15,12 +15,24 @@ def register_socketio_events(socketio):
     @socketio.on('connect')
     def handle_connect():
         """Handle client connection"""
+        from flask_socketio import join_room
+        from models.auth import User
+        
         streaming_service = get_streaming_service()
         activity_tracker = get_activity_tracker()
         
         # Track active user
         session_id = request.sid
         activity_tracker.add_active_user(current_user, session_id)
+        
+        # Check if user has streaming permissions and add to appropriate room
+        if current_user and current_user.is_authenticated:
+            user = User.query.get(current_user.id)
+            if user and user.streaming_enabled:
+                join_room('streaming_enabled')
+                print(f"User {user.username} joined streaming room")
+            else:
+                print(f"User {user.username if user else 'Unknown'} denied streaming access")
         
         if streaming_service:
             client_id, client_count = streaming_service.add_client()
@@ -248,3 +260,37 @@ def register_socketio_events(socketio):
         activity_tracker.update_last_seen(user_id)
 
     return socketio
+
+
+def notify_streaming_change(socketio, user_id, streaming_enabled):
+    """Notify specific user about streaming permission change"""
+    from services.monitoring.activity_tracker import get_activity_tracker
+    from flask_socketio import join_room, leave_room
+    
+    activity_tracker = get_activity_tracker()
+    active_users = activity_tracker.get_active_users()
+    
+    # Find the user's session and notify them
+    for user_info in active_users:
+        if user_info.get('id') == user_id:
+            session_id = user_info.get('session_id')
+            if session_id:
+                if streaming_enabled:
+                    # Add user to streaming room
+                    socketio.server.enter_room(session_id, 'streaming_enabled')
+                    print(f"User {user_id} added to streaming room")
+                else:
+                    # Remove user from streaming room
+                    socketio.server.leave_room(session_id, 'streaming_enabled')
+                    print(f"User {user_id} removed from streaming room")
+                
+                socketio.emit('streaming_permission_changed', {
+                    'streaming_enabled': streaming_enabled,
+                    'message': 'Your streaming permission has been updated by an administrator.'
+                }, room=session_id)
+                
+    # Also broadcast to admin room for real-time updates
+    socketio.emit('user_streaming_updated', {
+        'user_id': user_id,
+        'streaming_enabled': streaming_enabled
+    }, room='admin_room')

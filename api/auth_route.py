@@ -1,7 +1,7 @@
 """
 Authentication blueprint for user management
 """
-from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
+from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app, jsonify
 from flask_login import login_user, logout_user, login_required, current_user
 from models.auth import User, LoginLog, db
 from forms.user_forms import LoginForm, SignupForm, ChangePasswordForm, UserManagementForm, CreateUserForm
@@ -141,6 +141,7 @@ def edit_user(user_id):
         user.relationship = form.relationship.data
         user.active = form.active.data == '1'
         user.is_admin = form.is_admin.data
+        user.streaming_enabled = form.streaming_enabled.data
         db.session.commit()
         flash(f'User {user.username} updated successfully!', 'success')
         return redirect(url_for('auth.user_management'))
@@ -151,6 +152,7 @@ def edit_user(user_id):
     form.relationship.data = user.relationship or 'Guardian'
     form.active.data = '1' if user.active else '0'
     form.is_admin.data = user.is_admin
+    form.streaming_enabled.data = user.streaming_enabled
     
     return render_template('auth/edit_user.html', form=form, user=user)
 
@@ -168,6 +170,7 @@ def create_user():
         user.set_password(form.password.data)
         user.active = form.active.data
         user.is_admin = form.is_admin.data
+        user.streaming_enabled = form.streaming_enabled.data
         user.first_login = True
         
         db.session.add(user)
@@ -213,3 +216,33 @@ def login_logs():
     )
     
     return render_template('auth/login_logs.html', logs=logs)
+
+@auth_bp.route('/admin/users/<int:user_id>/toggle-streaming', methods=['POST'])
+@login_required
+@admin_required
+def toggle_streaming(user_id):
+    """Toggle streaming permission for a user"""
+    user = User.query.get_or_404(user_id)
+    
+    # Toggle streaming permission
+    user.streaming_enabled = not user.streaming_enabled
+    db.session.commit()
+    
+    # Import here to avoid circular import
+    from api.websocket_handlers import notify_streaming_change
+    from flask import current_app
+    
+    # Notify the specific user about streaming permission change
+    try:
+        socketio = current_app.extensions.get('socketio')
+        if socketio:
+            notify_streaming_change(socketio, user_id, user.streaming_enabled)
+    except Exception as e:
+        print(f"Error notifying streaming change: {e}")
+    
+    status = "enabled" if user.streaming_enabled else "disabled"
+    return jsonify({
+        'success': True,
+        'message': f'Streaming {status} for {user.username}',
+        'streaming_enabled': user.streaming_enabled
+    })

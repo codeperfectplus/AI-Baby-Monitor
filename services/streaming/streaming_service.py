@@ -121,8 +121,8 @@ class WebStreamManager(threading.Thread):
                         # Convert to base64 for WebSocket transmission
                         frame_b64 = base64.b64encode(buffer).decode('utf-8')
                         
-                        # Send to all connected clients via WebSocket
-                        self.socketio.emit('video_frame', {'frame': frame_b64})
+                        # Send to only users with streaming permissions via WebSocket room
+                        self.socketio.emit('video_frame', {'frame': frame_b64}, room='streaming_enabled')
                         
                         # Memory cleanup
                         del buffer, frame_b64
