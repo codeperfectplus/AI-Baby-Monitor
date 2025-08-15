@@ -69,44 +69,6 @@ def notify(title, message):
             print(f"[DEBUG] Notification system unavailable: {e}")
 
 
-def notify_web(title, message):
-    """Send notification to web interface using SQLAlchemy"""
-    try:
-        if config.NOTIFY_ON_PERSON:
-            # Import here to avoid circular imports
-            from models.notification import notification_manager
-            
-            notification_type = get_notification_type(title)
-            notification_id = notification_manager.add_notification_safe(title, message, notification_type)
-            
-            if notification_id:
-                log_line(f"[WEB_NOTIFICATION] {title}: {message}")
-            else:
-                log_line(f"[ERROR] Failed to save web notification: {title}: {message}")
-            
-    except Exception as e:
-        log_line(f"[ERROR] Web notification failed: {e}")
-
-
-def notify_all(title, message):
-    """Send notification to both system and web interface"""
-    # notify(title, message)  # System notification
-    notify_web(title, message)  # Web notification
-
-
-def get_notification_type(title):
-    """Determine notification type based on title for UI styling"""
-    title_lower = title.lower()
-    if 'wake' in title_lower or 'awake' in title_lower:
-        return 'info'
-    elif 'sleep' in title_lower:
-        return 'success'
-    elif 'warning' in title_lower or 'fall' in title_lower or 'risk' in title_lower:
-        return 'warning'
-    elif 'alert' in title_lower or 'danger' in title_lower:
-        return 'error'
-    else:
-        return 'info'
 
 
 def get_recent_notifications(limit=10):

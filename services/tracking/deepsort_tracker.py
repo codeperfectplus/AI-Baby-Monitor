@@ -3,7 +3,12 @@ DeepSORT tracking module for object tracking
 """
 from deep_sort_realtime.deepsort_tracker import DeepSort
 from config.settings import config
-from utils.helpers import calculate_iou, log_line, notify_all
+from utils.helpers import calculate_iou, log_line
+
+from services.notification.notification_service import get_notification_service
+
+notification_service = get_notification_service()
+
 
 
 class DeepSortTracker:
@@ -74,7 +79,7 @@ class DeepSortTracker:
                 if l <= cx <= r and t_y <= cy <= b:
                     self.child_id = t.track_id
                     log_line(f"Child manually selected: track_id={self.child_id}")
-                    notify_all("Child Selected", f"Locked to track ID {self.child_id}")
+                    notification_service.dispatch_notification("Child Selected", f"Locked to track ID {self.child_id}")
                     break
             self.click_point = None  # consume click
     
@@ -100,7 +105,7 @@ class DeepSortTracker:
             if best_id is not None:
                 self.child_id = best_id
                 log_line(f"Child auto-selected (smallest person): track_id={self.child_id}")
-                notify_all("Child Selected", f"Auto-selected track ID {self.child_id}")
+                notification_service.dispatch_notification("Child Selected", f"Auto-selected track ID {self.child_id}")
     
     def get_child_center(self, tracks):
         """Get center coordinates of the selected child"""
@@ -126,4 +131,4 @@ class DeepSortTracker:
         self.child_id = None
         self.click_point = None
         log_line("Child selection cleared.")
-        notify_all("Child Selection", "Child selection cleared")
+        notification_service.dispatch_notification("Child Selection", "Child selection cleared")

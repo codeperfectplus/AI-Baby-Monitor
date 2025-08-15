@@ -3,7 +3,10 @@ Sleep and safety monitoring module
 """
 import time
 from config.settings import config
-from utils.helpers import log_line, notify_all
+from utils.helpers import log_line
+from services.notification.notification_service import get_notification_service
+
+notification_service = get_notification_service()
 
 
 class SleepMonitor:
@@ -65,7 +68,7 @@ class SleepMonitor:
                     self.last_wake_notification = current_time
                     self.wake_alert_display_time = current_time  # Show wake alert for 5 seconds
                     log_line("[WAKE] Child is now moving after sleep")
-                    notify_all("[WAKE] Child Awake", "Child has woken up and started moving!")
+                    notification_service.dispatch_notification("[WAKE] Child Awake", "Child has woken up and started moving!")
         
         # Update position tracking
         self.child_last_position = child_center
@@ -80,7 +83,7 @@ class SleepMonitor:
                     # Child has been stationary long enough - mark as sleeping
                     self.child_is_sleeping = True
                     log_line(f"[SLEEP] Child has been stationary for {config.SLEEP_TIME_SEC} seconds")
-                    notify_all("[SLEEP] Child Sleeping", 
+                    notification_service.dispatch_notification("[SLEEP] Child Sleeping", 
                           f"Child appears to be sleeping (no movement for {config.SLEEP_TIME_SEC//60}+ minutes)")
             
             elif movement_detected:
@@ -179,7 +182,7 @@ class SafetyMonitor:
                 (current_time - self.last_alert_time) > config.ALERT_COOLDOWN_SEC):
                 self.last_alert_time = current_time
                 log_line("[ALERT] Child near edge (outside safe zone)")
-                notify_all("[WARNING] Fall Risk", "Child is near the bed edge!")
+                notification_service.dispatch_notification("[WARNING] Fall Risk", "Child is near the bed edge!")
                 return True
         
         return False
