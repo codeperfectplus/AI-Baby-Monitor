@@ -76,6 +76,7 @@ def signup():
         user = User()
         user.username = form.username.data
         user.email = form.email.data
+        user.relationship = form.relationship.data
         user.set_password(form.password.data)
         user.active = False  # Inactive by default
         user.first_login = True
@@ -137,6 +138,7 @@ def edit_user(user_id):
         
         user.username = form.username.data
         user.email = form.email.data
+        user.relationship = form.relationship.data
         user.active = form.active.data == '1'
         user.is_admin = form.is_admin.data
         db.session.commit()
@@ -146,6 +148,7 @@ def edit_user(user_id):
     # Pre-populate form
     form.username.data = user.username
     form.email.data = user.email
+    form.relationship.data = user.relationship or 'Guardian'
     form.active.data = '1' if user.active else '0'
     form.is_admin.data = user.is_admin
     
@@ -161,6 +164,7 @@ def create_user():
         user = User()
         user.username = form.username.data
         user.email = form.email.data
+        user.relationship = form.relationship.data
         user.set_password(form.password.data)
         user.active = form.active.data
         user.is_admin = form.is_admin.data

@@ -2,8 +2,11 @@
 WebSocket event handlers for real-time communication
 """
 from flask_socketio import emit
+from flask import request
+from flask_login import current_user
 from services.streaming.streaming_service import get_streaming_service
 from services.monitoring.monitor_service import get_monitor_service
+from services.monitoring.activity_tracker import get_activity_tracker
 
 
 def register_socketio_events(socketio):
@@ -13,6 +16,11 @@ def register_socketio_events(socketio):
     def handle_connect():
         """Handle client connection"""
         streaming_service = get_streaming_service()
+        activity_tracker = get_activity_tracker()
+        
+        # Track active user
+        session_id = request.sid
+        activity_tracker.add_active_user(current_user, session_id)
         
         if streaming_service:
             client_id, client_count = streaming_service.add_client()
@@ -30,15 +38,32 @@ def register_socketio_events(socketio):
                 'client_count': 0,
                 'client_id': 'offline-mode'
             })
+        
+        # Broadcast active users update to all admin users
+        socketio.emit('active_users_update', {
+            'active_users': activity_tracker.get_active_users(),
+            'count': activity_tracker.get_active_count()
+        }, room='admin_room')
 
     @socketio.on('disconnect')
     def handle_disconnect():
         """Handle client disconnection"""
         streaming_service = get_streaming_service()
+        activity_tracker = get_activity_tracker()
+        
+        # Remove user from active tracking
+        user_id = current_user.id if current_user and hasattr(current_user, 'id') else 'anonymous'
+        activity_tracker.remove_active_user(user_id)
         
         if streaming_service:
             client_count = streaming_service.remove_client()
             print(f"Client disconnected. Total clients: {client_count}")
+        
+        # Broadcast active users update to all admin users
+        socketio.emit('active_users_update', {
+            'active_users': activity_tracker.get_active_users(),
+            'count': activity_tracker.get_active_count()
+        }, room='admin_room')
 
     @socketio.on('test_message')
     def handle_test_message(data):
@@ -190,5 +215,36 @@ def register_socketio_events(socketio):
                 
         except Exception as e:
             emit('bed_status_error', {'message': str(e)})
+
+    @socketio.on('join_admin_room')
+    def handle_join_admin_room():
+        """Handle admin users joining the admin room for active user updates"""
+        if current_user and hasattr(current_user, 'is_admin') and current_user.is_admin:
+            from flask_socketio import join_room
+            join_room('admin_room')
+            
+            # Send current active users to the admin
+            activity_tracker = get_activity_tracker()
+            emit('active_users_update', {
+                'active_users': activity_tracker.get_active_users(),
+                'count': activity_tracker.get_active_count()
+            })
+
+    @socketio.on('request_active_users')
+    def handle_request_active_users():
+        """Handle request for current active users (admin only)"""
+        if current_user and hasattr(current_user, 'is_admin') and current_user.is_admin:
+            activity_tracker = get_activity_tracker()
+            emit('active_users_update', {
+                'active_users': activity_tracker.get_active_users(),
+                'count': activity_tracker.get_active_count()
+            })
+
+    @socketio.on('heartbeat')
+    def handle_heartbeat():
+        """Handle heartbeat to keep user active"""
+        activity_tracker = get_activity_tracker()
+        user_id = current_user.id if current_user and hasattr(current_user, 'id') else 'anonymous'
+        activity_tracker.update_last_seen(user_id)
 
     return socketio

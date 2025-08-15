@@ -82,6 +82,7 @@
                     <thead class="bg-gray-800 bg-opacity-50">
                         <tr>
                             <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">User</th>
+                            <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Relationship</th>
                             <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Status</th>
                             <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Role</th>
                             <th class="px-6 py-4 text-left text-sm font-medium text-gray-300 uppercase tracking-wider">Created</th>
@@ -102,6 +103,11 @@
                                         <div class="text-sm text-gray-400">{{ user.email }}</div>
                                     </div>
                                 </div>
+                            </td>
+                            <td class="px-6 py-4 whitespace-nowrap">
+                                <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-cyan-500 bg-opacity-20 text-cyan-300 border border-cyan-400">
+                                    <i class="fas fa-users mr-1"></i>{{ user.relationship or 'Guardian' }}
+                                </span>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 {% if user.active %}

@@ -37,6 +37,10 @@ app.register_blueprint(metrics_bp)
 app.register_blueprint(monitor_bp)
 app.register_blueprint(notification_bp)
 
+# Import and register active users blueprint
+from api.active_users_route import active_users_bp
+app.register_blueprint(active_users_bp)
+
 # Initialize databases (notification manager first, then auth)
 notification_manager.init_app(app)
 init_db(app)

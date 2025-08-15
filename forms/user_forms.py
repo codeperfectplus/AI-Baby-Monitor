@@ -20,6 +20,11 @@ class SignupForm(FlaskForm):
         Length(min=3, max=80, message="Username must be between 3 and 80 characters")
     ])
     email = StringField('Email', validators=[DataRequired(), Email()])
+    relationship = SelectField('Relationship to Child', 
+                              choices=[('Father', 'Father'), ('Mother', 'Mother'), 
+                                     ('Guardian', 'Guardian'), ('Grandparent', 'Grandparent'),
+                                     ('Babysitter', 'Babysitter'), ('Other', 'Other')],
+                              default='Guardian')
     password = PasswordField('Password', validators=[
         DataRequired(), 
         Length(min=6, message="Password must be at least 6 characters long")
@@ -59,6 +64,11 @@ class UserManagementForm(FlaskForm):
     """User management form for admin"""
     username = StringField('Username', validators=[DataRequired(), Length(min=3, max=80)])
     email = StringField('Email', validators=[DataRequired(), Email()])
+    relationship = SelectField('Relationship to Child', 
+                              choices=[('Father', 'Father'), ('Mother', 'Mother'), 
+                                     ('Guardian', 'Guardian'), ('Grandparent', 'Grandparent'),
+                                     ('Babysitter', 'Babysitter'), ('Other', 'Other')],
+                              default='Guardian')
     active = SelectField('Status', choices=[('1', 'Active'), ('0', 'Inactive')], coerce=str)
     is_admin = BooleanField('Admin User')
     submit = SubmitField('Update User')
@@ -67,6 +77,11 @@ class CreateUserForm(FlaskForm):
     """Create new user form for admin"""
     username = StringField('Username', validators=[DataRequired(), Length(min=3, max=80)])
     email = StringField('Email', validators=[DataRequired(), Email()])
+    relationship = SelectField('Relationship to Child', 
+                              choices=[('Father', 'Father'), ('Mother', 'Mother'), 
+                                     ('Guardian', 'Guardian'), ('Grandparent', 'Grandparent'),
+                                     ('Babysitter', 'Babysitter'), ('Other', 'Other')],
+                              default='Guardian')
     password = PasswordField('Password', validators=[
         DataRequired(), 
         Length(min=6, message="Password must be at least 6 characters long")

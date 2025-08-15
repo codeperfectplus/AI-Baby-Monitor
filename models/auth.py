@@ -15,6 +15,7 @@ class User(UserMixin, db.Model):
     username = db.Column(db.String(80), unique=True, nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
     password_hash = db.Column(db.String(255), nullable=False)
+    relationship = db.Column(db.String(50), nullable=True, default='Guardian')
     active = db.Column(db.Boolean, default=False, nullable=False)
     is_admin = db.Column(db.Boolean, default=False, nullable=False)
     first_login = db.Column(db.Boolean, default=True, nullable=False)
@@ -81,10 +82,11 @@ def init_db(app):
             admin_user = User()
             admin_user.username = 'admin'
             admin_user.email = 'admin@localhost'
+            admin_user.relationship = 'Father'
             admin_user.active = True
             admin_user.is_admin = True
             admin_user.first_login = True
             admin_user.set_password('password')
             db.session.add(admin_user)
             db.session.commit()
-            print("[INFO] Default admin user created (username: admin, password: password)")
+            print("[INFO] Default admin user created (username: admin, password: password, relationship: Father)")

@@ -405,13 +405,17 @@
                         <div class="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white font-medium mr-2">
                             {{ current_user.username[0].upper() }}
                         </div>
-                        <span>{{ current_user.username }}</span>
+                        <div class="flex flex-col items-start">
+                            <span class="font-medium">{{ current_user.username }}</span>
+                            <span class="text-xs text-cyan-400">{{ current_user.relationship or 'Guardian' }}</span>
+                        </div>
                         <i class="fas fa-chevron-down ml-2 text-xs"></i>
                     </button>
                     <div id="user-dropdown" class="user-dropdown">
                         <div class="p-3 border-b border-white/10">
                             <p class="text-white font-medium">{{ current_user.username }}</p>
-                            <p class="text-gray-400 text-sm">{{ current_user.email }}</p>
+                            <p class="text-cyan-400 text-sm">{{ current_user.relationship or 'Guardian' }}</p>
+                            <p class="text-gray-400 text-xs">{{ current_user.email }}</p>
                         </div>
                         {% if current_user.is_admin %}
                         <a href="{{ url_for('auth.user_management') }}" class="dropdown-item">
@@ -442,9 +446,19 @@
                     AI-Powered Baby Monitor
                 </span>
             </h1>
-            <p class="text-xl text-gray-300 mb-8 max-w-3xl mx-auto">
+            <p class="text-xl text-gray-300 mb-4 max-w-3xl mx-auto">
                 Advanced real-time monitoring with computer vision, sleep analysis, and intelligent safety alerts
             </p>
+            
+            <!-- Currently Watching Indicator -->
+            <!-- <div class="glass-card rounded-full px-6 py-3 mb-8 inline-flex items-center gap-3">
+                <i class="fas fa-eye text-cyan-400"></i>
+                <span class="text-white font-medium">Currently Watching:</span>
+                <span class="text-cyan-400 font-bold">{{ current_user.username }}</span>
+                <span class="text-gray-400">•</span>
+                <span class="text-purple-400 font-medium">{{ current_user.relationship or 'Guardian' }}</span>
+                <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse ml-2"></div>
+            </div> -->
             
             <!-- Status Bar -->
             <div class="flex items-center justify-center gap-8 mb-8">
@@ -591,25 +605,6 @@
                         </div>
                     </div>
                 </div>
-
-                <!-- Quick Actions -->
-                <div class="grid grid-cols-3 gap-4">
-                    <button class="glass-card rounded-xl p-6 text-center hover:bg-green-500/10 transition-all duration-300 group">
-                        <i class="fas fa-shield-alt text-3xl text-green-400 mb-3 group-hover:scale-110 transition-transform"></i>
-                        <div class="font-semibold text-green-400">Safety Check</div>
-                        <div class="text-sm text-gray-400">Run safety analysis</div>
-                    </button>
-                    <button class="glass-card rounded-xl p-6 text-center hover:bg-blue-500/10 transition-all duration-300 group">
-                        <i class="fas fa-chart-area text-3xl text-blue-400 mb-3 group-hover:scale-110 transition-transform"></i>
-                        <div class="font-semibold text-blue-400">Sleep Report</div>
-                        <div class="text-sm text-gray-400">View sleep analytics</div>
-                    </button>
-                    <button class="glass-card rounded-xl p-6 text-center hover:bg-purple-500/10 transition-all duration-300 group">
-                        <i class="fas fa-bell text-3xl text-purple-400 mb-3 group-hover:scale-110 transition-transform"></i>
-                        <div class="font-semibold text-purple-400">Alerts</div>
-                        <div class="text-sm text-gray-400">Configure notifications</div>
-                    </button>
-                </div>
             </div>
 
             <!-- Sidebar -->
@@ -645,6 +640,23 @@
                             </div>
                         </div>
                     </div>
+
+                    {% if current_user.is_admin %}
+                    <!-- Active Viewers (Admin Only) -->
+                    <div class="glass-card rounded-2xl p-6" id="active-viewers-card">
+                        <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+                            <i class="fas fa-users text-purple-400"></i>
+                            Active Viewers
+                            <span id="active-count-badge" class="ml-2 bg-purple-500 bg-opacity-20 text-purple-400 text-xs font-medium px-2 py-1 rounded-full border border-purple-400">0</span>
+                        </h3>
+                        <div id="active-viewers-list" class="space-y-3">
+                            <div class="text-center text-gray-400 text-sm py-4">
+                                <i class="fas fa-user-clock text-2xl mb-2"></i>
+                                <p>No active viewers</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
 
                     <!-- System Status -->
                     <div class="glass-card rounded-2xl p-6">
@@ -813,6 +825,9 @@
     </div>
 
     <script>
+        // Global configuration
+        const currentUserId = {{ current_user.id if current_user.is_authenticated else 'null' }};
+        
         // WebSocket connection
         const socket = io();
         let streamActive = true;
@@ -845,6 +860,9 @@
             document.getElementById('ai-status').style.display = 'flex';
             
             showNotification('WebSocket connected successfully!', 'success');
+            
+            // Join admin room for active users updates (admin only)
+            joinAdminRoom();
         });
         
         socket.on('disconnect', function() {
@@ -919,6 +937,13 @@
         
         socket.on('child_status_error', function(data) {
             console.error('Child status error:', data.message);
+        });
+        
+        // Active users WebSocket handlers (admin only)
+        socket.on('active_users_update', function(data) {
+            if (document.getElementById('active-viewers-card')) {
+                updateActiveViewers(data.active_users, data.count);
+            }
         });
         
         // Control event handlers
@@ -1438,6 +1463,94 @@
 
         // Poll for notifications every 2 seconds
         setInterval(fetchNotifications, 2000);
+        
+        // Active viewers functions (admin only)
+        function joinAdminRoom() {
+            if (document.getElementById('active-viewers-card')) {
+                socket.emit('join_admin_room');
+            }
+        }
+        
+        function updateActiveViewers(activeUsers, count) {
+            const countBadge = document.getElementById('active-count-badge');
+            const viewersList = document.getElementById('active-viewers-list');
+            
+            if (!countBadge || !viewersList) return;
+            
+            // Update count badge
+            countBadge.textContent = count;
+            
+            // Clear existing list
+            viewersList.innerHTML = '';
+            
+            if (activeUsers.length === 0) {
+                viewersList.innerHTML = `
+                    <div class="text-center text-gray-400 text-sm py-4">
+                        <i class="fas fa-user-clock text-2xl mb-2"></i>
+                        <p>No active viewers</p>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Add each active user
+            activeUsers.forEach(user => {
+                const userElement = document.createElement('div');
+                userElement.className = 'feature-card rounded-xl p-3 flex items-center gap-3';
+                
+                const relationshipIcons = {
+                    'Father': 'fa-male',
+                    'Mother': 'fa-female',
+                    'Guardian': 'fa-shield-alt',
+                    'Grandparent': 'fa-heart',
+                    'Babysitter': 'fa-child',
+                    'Other': 'fa-user'
+                };
+                
+                const relationshipColors = {
+                    'Father': 'text-blue-400',
+                    'Mother': 'text-pink-400',
+                    'Guardian': 'text-green-400',
+                    'Grandparent': 'text-purple-400',
+                    'Babysitter': 'text-yellow-400',
+                    'Other': 'text-gray-400'
+                };
+                
+                const icon = relationshipIcons[user.relationship] || 'fa-user';
+                const color = relationshipColors[user.relationship] || 'text-gray-400';
+                const isCurrentUser = user.user_id == currentUserId;
+                
+                userElement.innerHTML = `
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white font-medium text-xs">
+                        ${user.username.charAt(0).toUpperCase()}
+                    </div>
+                    <div class="flex-1">
+                        <div class="flex items-center gap-2">
+                            <span class="font-semibold text-white text-sm">${user.username}</span>
+                            ${isCurrentUser ? '<span class="text-xs bg-cyan-500 bg-opacity-20 text-cyan-400 px-2 py-0.5 rounded-full border border-cyan-400">You</span>' : ''}
+                            ${user.is_admin ? '<span class="text-xs bg-purple-500 bg-opacity-20 text-purple-400 px-2 py-0.5 rounded-full border border-purple-400"><i class="fas fa-crown mr-1"></i>Admin</span>' : ''}
+                        </div>
+                        <div class="flex items-center gap-2 mt-1">
+                            <i class="fas ${icon} ${color} text-xs"></i>
+                            <span class="text-xs ${color}">${user.relationship}</span>
+                            <span class="text-xs text-gray-500">•</span>
+                            <span class="text-xs text-gray-400">Active now</span>
+                        </div>
+                    </div>
+                    <div class="w-2 h-2 bg-green-400 rounded-full animate-pulse"></div>
+                `;
+                
+                viewersList.appendChild(userElement);
+            });
+        }
+        
+        // Send heartbeat every 30 seconds to keep user active
+        setInterval(function() {
+            if (socket.connected) {
+                socket.emit('heartbeat');
+            }
+        }, 30000);
+        
     </script>
 </body>
 </html>
