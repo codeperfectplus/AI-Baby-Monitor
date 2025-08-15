@@ -73,6 +73,17 @@
    ```bash
    ./deploy.sh
    ```
+4. **Access the Web Interface**
+   Open your web browser and go to:
+   ```
+   http://localhost:8847
+   ```
+
+5. **Login Credentials**
+   - **Username**: admin
+   - **Password**: password
+ - **Change password after first login!**
+
 
 #### Run with python script
 

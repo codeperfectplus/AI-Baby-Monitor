@@ -4,7 +4,7 @@ Authentication blueprint for user management
 from flask import Blueprint, render_template, redirect, url_for, flash, request, current_app
 from flask_login import login_user, logout_user, login_required, current_user
 from models.auth import User, LoginLog, db
-from forms import LoginForm, SignupForm, ChangePasswordForm, UserManagementForm, CreateUserForm
+from forms.user_forms import LoginForm, SignupForm, ChangePasswordForm, UserManagementForm, CreateUserForm
 from datetime import datetime
 from functools import wraps
 

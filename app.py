@@ -85,6 +85,11 @@ except Exception as e:
 def index():
     return render_template('index.html')
 
+#health check endpoint
+@app.route('/health')
+def health_check():
+    return {"status": "healthy"}, 200
+
 
 if __name__ == '__main__':
     # Production-ready configuration with WebSocket support
