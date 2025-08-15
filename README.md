@@ -12,6 +12,8 @@
 
 </div>
 
+![SnapShot](assets/snapshots/snapshot_1.png)
+
 ---
 
 ## 🌟 Features

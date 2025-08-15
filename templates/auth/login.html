@@ -3,10 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - RTSP Monitor</title>
+    <title>Login - AI Baby Monitor</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👶</text></svg>">
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
@@ -17,44 +18,139 @@
         body {
             background: linear-gradient(135deg, #0c0a1e 0%, #1e1b3a 50%, #2d1b69 100%);
             min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(0, 245, 255, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.1) 0%, transparent 50%);
+            pointer-events: none;
         }
         
         .glass-card {
-            background: rgba(255, 255, 255, 0.05);
-            backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            border-radius: 1rem;
+            pointer-events: none;
         }
         
         .input-field {
             background: rgba(255, 255, 255, 0.1);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
         }
         
         .input-field:focus {
             background: rgba(255, 255, 255, 0.15);
             border-color: #00f5ff;
-            box-shadow: 0 0 20px rgba(0, 245, 255, 0.3);
+            box-shadow: 
+                0 0 20px rgba(0, 245, 255, 0.3),
+                0 0 40px rgba(0, 245, 255, 0.1);
+            transform: scale(1.02);
+        }
+
+        .input-field.valid {
+            border-color: #10b981;
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.3);
+        }
+
+        .input-field.invalid {
+            border-color: #ef4444;
+            box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
         }
         
         .btn-primary {
             background: linear-gradient(135deg, #00f5ff 0%, #7c3aed 100%);
-            transition: all 0.3s ease;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
         }
         
         .btn-primary:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px rgba(0, 245, 255, 0.4);
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 245, 255, 0.4);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
         }
         
         .floating-animation {
             animation: float 6s ease-in-out infinite;
         }
+
+        .breathing-animation {
+            animation: breathe 3s ease-in-out infinite;
+        }
+
+        .baby-icon {
+            display: inline-block;
+            position: relative;
+        }
+
+        .baby-icon::after {
+            content: '💤';
+            position: absolute;
+            top: -10px;
+            right: -15px;
+            font-size: 0.8em;
+            animation: sleep 2s ease-in-out infinite;
+        }
         
         @keyframes float {
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-20px); }
+        }
+
+        @keyframes breathe {
+            0%, 100% { transform: scale(1); opacity: 0.8; }
+            50% { transform: scale(1.05); opacity: 1; }
+        }
+
+        @keyframes sleep {
+            0%, 100% { opacity: 0.3; transform: translateY(0px); }
+            50% { opacity: 1; transform: translateY(-5px); }
         }
 
         .floating-particle {
@@ -63,22 +159,156 @@
             height: 4px;
             background: rgba(0, 245, 255, 0.6);
             border-radius: 50%;
-            animation: floatParticle 6s infinite linear;
+            animation: floatParticle 8s infinite linear;
+        }
+
+        .baby-particle {
+            position: absolute;
+            width: 6px;
+            height: 6px;
+            background: radial-gradient(circle, rgba(0, 245, 255, 0.8) 0%, transparent 70%);
+            border-radius: 50%;
+            animation: floatParticle 10s infinite linear;
+        }
+
+        .baby-particle::after {
+            content: '⭐';
+            position: absolute;
+            top: -2px;
+            left: -2px;
+            font-size: 8px;
+            opacity: 0.7;
         }
         
         @keyframes floatParticle {
             0% { 
-                transform: translateY(100vh) translateX(0px);
+                transform: translateY(100vh) translateX(0px) rotate(0deg);
                 opacity: 0;
             }
             10% { opacity: 1; }
             90% { opacity: 1; }
             100% { 
-                transform: translateY(-10px) translateX(100px);
+                transform: translateY(-10px) translateX(100px) rotate(360deg);
                 opacity: 0;
             }
         }
+
+        .password-toggle {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.6);
+            transition: color 0.3s ease;
+        }
+
+        .password-toggle:hover {
+            color: #00f5ff;
+        }
+
+        .security-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 0.75rem;
+            color: #10b981;
+        }
+
+        .status-indicator {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: #10b981;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .greeting-text {
+            opacity: 0;
+            animation: fadeInUp 1s ease-out 0.5s forwards;
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
+    <script>
+        // Get current time for greeting
+        function getTimeBasedGreeting() {
+            const hour = new Date().getHours();
+            if (hour < 6) return { greeting: "Good night", message: "Keeping watch while your little one dreams" };
+            if (hour < 12) return { greeting: "Good morning", message: "Starting the day with your baby's safety" };
+            if (hour < 18) return { greeting: "Good afternoon", message: "Your baby's comfort is our priority" };
+            return { greeting: "Good evening", message: "Peaceful monitoring for restful nights" };
+        }
+
+        // Real-time validation
+        function validateField(field) {
+            const value = field.value.trim();
+            const fieldType = field.name;
+            
+            field.classList.remove('valid', 'invalid');
+            
+            if (value.length === 0) return;
+            
+            let isValid = false;
+            
+            if (fieldType === 'username') {
+                isValid = value.length >= 3;
+            } else if (fieldType === 'password') {
+                isValid = value.length >= 6;
+            }
+            
+            field.classList.add(isValid ? 'valid' : 'invalid');
+        }
+
+        // Password visibility toggle
+        function togglePassword() {
+            const passwordField = document.querySelector('input[name="password"]');
+            const toggleIcon = document.querySelector('.password-toggle i');
+            
+            if (passwordField.type === 'password') {
+                passwordField.type = 'text';
+                toggleIcon.className = 'fas fa-eye-slash';
+            } else {
+                passwordField.type = 'password';
+                toggleIcon.className = 'fas fa-eye';
+            }
+        }
+
+        // Form submission with loading state
+        function handleSubmit(form) {
+            const submitBtn = form.querySelector('input[type="submit"]');
+            const originalValue = submitBtn.value;
+            
+            submitBtn.disabled = true;
+            submitBtn.value = 'Connecting...';
+            submitBtn.classList.add('animate-pulse');
+            
+            // Reset after 3 seconds if form doesn't redirect
+            setTimeout(() => {
+                submitBtn.disabled = false;
+                submitBtn.value = originalValue;
+                submitBtn.classList.remove('animate-pulse');
+            }, 3000);
+        }
+    </script>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
     <!-- Floating particles background -->
@@ -89,6 +319,10 @@
         <div class="floating-particle" style="left: 40%; animation-delay: 3s;"></div>
         <div class="floating-particle" style="left: 50%; animation-delay: 4s;"></div>
         <div class="floating-particle" style="left: 60%; animation-delay: 5s;"></div>
+        <!-- Baby-themed particles -->
+        <div class="baby-particle" style="left: 15%; animation-delay: 2s; animation-duration: 12s;"></div>
+        <div class="baby-particle" style="left: 35%; animation-delay: 6s; animation-duration: 15s;"></div>
+        <div class="baby-particle" style="left: 55%; animation-delay: 10s; animation-duration: 18s;"></div>
     </div>
 
     <div class="max-w-md w-full space-y-8 relative z-10">
@@ -108,22 +342,40 @@
         <!-- Login Card -->
         <div class="glass-card rounded-2xl p-8">
             <div class="text-center mb-8">
-                <div class="floating-animation inline-block">
-                    <i class="fas fa-video text-6xl text-cyan-400 mb-4"></i>
+                <div class="floating-animation breathing-animation inline-block baby-icon">
+                    <i class="fas fa-baby text-6xl text-cyan-400 mb-4"></i>
                 </div>
-                <h2 class="text-3xl font-bold text-white mb-2">Welcome Back</h2>
-                <p class="text-gray-300">Sign in to access RTSP Monitor</p>
+                <div class="greeting-text">
+                    <h2 id="greeting-title" class="text-3xl font-bold text-white mb-2">Welcome Back</h2>
+                    <p id="greeting-message" class="text-gray-300">Monitor your little one securely</p>
+                </div>
+                
+                <!-- Security badges -->
+                <div class="flex justify-center gap-3 mt-4">
+                    <div class="security-badge">
+                        <div class="status-indicator"></div>
+                        <span>Secure Connection</span>
+                    </div>
+                    <div class="security-badge">
+                        <i class="fas fa-shield-alt text-xs"></i>
+                        <span>SSL Encrypted</span>
+                    </div>
+                </div>
             </div>
             
-            <form method="POST" class="space-y-6">
+            <form method="POST" class="space-y-6" onsubmit="handleSubmit(this)">
                 {{ form.hidden_tag() }}
                 
                 <!-- Username Field -->
                 <div>
                     <label for="username" class="block text-sm font-medium text-gray-300 mb-2">
-                        <i class="fas fa-user mr-2"></i>Username
+                        <i class="fas fa-user-circle mr-2"></i>Username
                     </label>
-                    {{ form.username(class="w-full px-4 py-3 input-field text-white placeholder-gray-400 rounded-lg focus:outline-none", placeholder="Enter your username") }}
+                    {{ form.username(
+                        class="w-full px-4 py-3 input-field text-white placeholder-gray-400 rounded-lg focus:outline-none", 
+                        placeholder="Enter your username",
+                        oninput="validateField(this)"
+                    ) }}
                     {% if form.username.errors %}
                         <div class="mt-1">
                             {% for error in form.username.errors %}
@@ -134,11 +386,18 @@
                 </div>
                 
                 <!-- Password Field -->
-                <div>
+                <div class="relative">
                     <label for="password" class="block text-sm font-medium text-gray-300 mb-2">
                         <i class="fas fa-lock mr-2"></i>Password
                     </label>
-                    {{ form.password(class="w-full px-4 py-3 input-field text-white placeholder-gray-400 rounded-lg focus:outline-none", placeholder="Enter your password") }}
+                    {{ form.password(
+                        class="w-full px-4 py-3 pr-12 input-field text-white placeholder-gray-400 rounded-lg focus:outline-none", 
+                        placeholder="Enter your password",
+                        oninput="validateField(this)"
+                    ) }}
+                    <div class="password-toggle" onclick="togglePassword()">
+                        <i class="fas fa-eye"></i>
+                    </div>
                     {% if form.password.errors %}
                         <div class="mt-1">
                             {% for error in form.password.errors %}
@@ -169,7 +428,7 @@
                 <p class="text-gray-300">
                     Don't have an account? 
                     <a href="{{ url_for('auth.signup') }}" class="text-cyan-400 hover:text-cyan-300 font-medium transition-colors duration-200">
-                        Sign up
+                        <i class="fas fa-user-plus mr-1"></i>Sign up
                     </a>
                 </p>
             </div>
@@ -177,10 +436,37 @@
         
         <!-- Footer -->
         <div class="text-center">
-            <p class="text-gray-400 text-sm">
-                AI Baby monitor by code perfect plus
+            <div class="flex justify-center items-center gap-2 mb-2">
+                <i class="fas fa-heart text-pink-400"></i>
+                <span class="text-gray-400 text-sm">Your baby's safety, one click away</span>
+                <i class="fas fa-shield-alt text-green-400"></i>
+            </div>
+            <p class="text-gray-500 text-xs">
+                AI Baby Monitor by Code Perfect Plus
             </p>
         </div>
     </div>
+
+    <script>
+        // Initialize page
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set time-based greeting
+            const { greeting, message } = getTimeBasedGreeting();
+            document.getElementById('greeting-title').textContent = greeting;
+            document.getElementById('greeting-message').textContent = message;
+            
+            // Add focus animations to form fields
+            const formFields = document.querySelectorAll('.input-field');
+            formFields.forEach(field => {
+                field.addEventListener('focus', function() {
+                    this.parentElement.classList.add('animate__animated', 'animate__pulse');
+                });
+                
+                field.addEventListener('blur', function() {
+                    this.parentElement.classList.remove('animate__animated', 'animate__pulse');
+                });
+            });
+        });
+    </script>
 </body>
 </html>
