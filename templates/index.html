@@ -950,6 +950,12 @@
         
         // Handle streaming permission changes
         socket.on('streaming_permission_changed', function(data) {
+            // If message has target_user_id, check if it's for current user
+            if (data.target_user_id && data.target_user_id !== currentUserId) {
+                return; // Not for this user
+            }
+            
+            console.log('[DEBUG] Received streaming permission change:', data);
             streamingEnabled = data.streaming_enabled;
             checkStreamingPermissions();
             

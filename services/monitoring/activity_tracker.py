@@ -49,11 +49,13 @@ class UserActivityTracker:
             for user_id, user_data in self._active_users.items():
                 if user_data['last_seen'] > active_threshold:
                     active_users.append({
+                        'id': user_id,
                         'user_id': user_id,
                         'username': user_data['username'],
                         'relationship': user_data['relationship'],
                         'last_seen': user_data['last_seen'].isoformat(),
                         'is_admin': user_data.get('is_admin', False),
+                        'session_id': user_data.get('session_id'),
                         'session_duration': str(current_time - user_data['last_seen']).split('.')[0]
                     })
                 else:

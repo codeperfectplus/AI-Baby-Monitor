@@ -270,24 +270,42 @@ def notify_streaming_change(socketio, user_id, streaming_enabled):
     activity_tracker = get_activity_tracker()
     active_users = activity_tracker.get_active_users()
     
+    print(f"[DEBUG] Notifying user {user_id} about streaming change: {streaming_enabled}")
+    print(f"[DEBUG] Active users: {[user.get('id') for user in active_users]}")
+    
     # Find the user's session and notify them
+    user_found = False
     for user_info in active_users:
         if user_info.get('id') == user_id:
+            user_found = True
             session_id = user_info.get('session_id')
+            print(f"[DEBUG] Found user {user_id} with session {session_id}")
+            
             if session_id:
                 if streaming_enabled:
                     # Add user to streaming room
                     socketio.server.enter_room(session_id, 'streaming_enabled')
-                    print(f"User {user_id} added to streaming room")
+                    print(f"[DEBUG] User {user_id} added to streaming room")
                 else:
                     # Remove user from streaming room
                     socketio.server.leave_room(session_id, 'streaming_enabled')
-                    print(f"User {user_id} removed from streaming room")
+                    print(f"[DEBUG] User {user_id} removed from streaming room")
                 
+                # Send direct message to the user's session
                 socketio.emit('streaming_permission_changed', {
                     'streaming_enabled': streaming_enabled,
                     'message': 'Your streaming permission has been updated by an administrator.'
                 }, room=session_id)
+                print(f"[DEBUG] Sent permission change notification to session {session_id}")
+    
+    if not user_found:
+        print(f"[DEBUG] User {user_id} not found in active users, sending broadcast")
+        # If user not found in active users, try broadcasting to all sessions
+        socketio.emit('streaming_permission_changed', {
+            'streaming_enabled': streaming_enabled,
+            'message': 'Your streaming permission has been updated by an administrator.',
+            'target_user_id': user_id
+        })
                 
     # Also broadcast to admin room for real-time updates
     socketio.emit('user_streaming_updated', {
