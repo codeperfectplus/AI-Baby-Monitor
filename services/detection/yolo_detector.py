@@ -17,10 +17,10 @@ class YOLODetector(BaseDetector):
         print("[INFO] Forced PyTorch to use CPU only")
         
         # Load YOLO model
-        self.model = YOLO(config.MODEL_PATH)
+        self.model = YOLO(config.YOLO_MODEL_PATH)
         self.model.to('cpu')
         print(f"[INFO] YOLOv8 model loaded on CPU device")
-        print(f"[INFO] Using YOLO model: {config.MODEL_PATH} (CPU-only mode)")
+        print(f"[INFO] Using YOLO model: {config.YOLO_MODEL_PATH} (CPU-only mode)")
         
         # Bed detection caching
         self.cached_bed_box = None

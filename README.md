@@ -47,6 +47,14 @@
 - **Buffering Optimization**: Low-latency streaming with minimal delay
 - **Connection Status**: Visual indicators for stream health
 
+### 👥 **Multi-User Web Interface**
+- **Secure Authentication**: Login/signup system with role-based access control
+- **Family Management**: Relationship-based user profiles (Mother, Father, Guardian, Caregiver)
+- **Stream Permissions**: Admin control over who can view the live stream
+- **Real-time Monitoring**: See which family members are currently watching
+- **Activity Tracking**: Monitor user sessions and login history
+- **Admin Dashboard**: Complete user management with enable/disable capabilities
+
 ---
 
 ### 📋 Prerequisites
@@ -57,12 +65,12 @@
 
 ### 🔧 Installation
 
-#### Run with Docker (Recommended0)
+#### Run with Docker (Recommended)
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/your-username/RTSP-Recorder.git
-   cd RTSP-Recorder
+   git clone https://github.com/codeperfectplus/AI-Baby-Monitor.git
+   cd AI-Baby-Monitor
    ```
 
 2. **Configure environment:**
@@ -81,18 +89,18 @@
    http://localhost:8847
    ```
 
-5. **Login Credentials**
+5. **Default Login Credentials**
    - **Username**: admin
    - **Password**: password
- - **Change password after first login!**
+   - **⚠️ Change password after first login!**
 
 
-#### Run with python script
+#### Run with Python Script
 
 1. **Clone the Repository**
    ```bash
-   git clone https://github.com/your-username/RTSP-Recorder.git
-   cd RTSP-Recorder
+   git clone https://github.com/codeperfectplus/AI-Baby-Monitor.git
+   cd AI-Baby-Monitor
    ```
 
 2. **Install Dependencies**
@@ -117,9 +125,15 @@
    RTSP_STREAM=stream1
    ```
 
-4. **Run the Application**
+4. **Run the Web Application**
    ```bash
-   python baby_monitor.py
+   python app.py
+   ```
+
+5. **Access the Interface**
+   Open your browser and navigate to:
+   ```
+   http://localhost:8847
    ```
 
 ## 📷 Camera Setup Guide
@@ -162,6 +176,78 @@ Common RTSP URL patterns:
    # Using FFmpeg
    ffprobe rtsp://username:password@camera_ip:554/stream1
    ```
+
+---
+
+## 👥 Web Interface & User Management
+
+### 🔐 **Authentication System**
+
+The application provides a comprehensive web-based interface with secure user management:
+
+#### **User Roles & Relationships**
+- **Father** - Full administrative access
+- **Mother** - Full administrative access  
+- **Guardian** - Limited monitoring access
+- **Caregiver** - Supervised access with restricted features
+
+#### **Admin Features**
+- **User Management**: Create, edit, enable/disable user accounts
+- **Stream Control**: Grant or revoke streaming permissions per user
+- **Activity Monitoring**: See who's currently watching and their login history
+- **Relationship Management**: Assign family roles to users
+
+#### **Family Monitoring Dashboard**
+- **Active Users Display**: Real-time view of family members currently monitoring
+- **Session Tracking**: Monitor login times and activity duration
+- **Permission Management**: Control access to live stream on per-user basis
+- **Login History**: Track family member access patterns
+
+#### **Security Features**
+- **First-time Password Change**: Mandatory password update on initial login
+- **Session Management**: Automatic timeout and secure session handling
+- **IP Tracking**: Log access attempts with IP address and browser information
+- **Account Status Control**: Enable/disable accounts without deletion
+
+### 🌐 **Web Interface Navigation**
+
+#### **Main Dashboard** (`/`)
+- Live RTSP stream with AI detection overlays
+- Real-time sleep/wake status monitoring
+- Family activity indicators
+
+#### **User Management** (`/auth/user-management`)
+- Add new family members with relationship assignments
+- Edit existing user profiles and permissions
+- View comprehensive login history
+- Enable/disable streaming access per user
+
+#### **Authentication Pages**
+- **Login** (`/auth/login`) - Secure access with remember me option
+- **Signup** (`/auth/signup`) - New user registration with relationship selection
+- **Password Management** (`/auth/change-password`) - Secure password updates
+
+---
+
+## 🔴 Real-Time Monitoring Features
+
+### 👨‍👩‍👧‍👦 **Family Activity Tracking**
+- **Live User Status**: See which family members are currently watching
+- **Session Duration**: Track how long each user has been monitoring  
+- **Relationship Display**: Identify watchers by their family role (Mother, Father, etc.)
+- **Multi-User Support**: Multiple family members can monitor simultaneously
+
+### 🎛️ **Admin Control Panel**
+- **Stream Access Control**: Enable/disable streaming for specific users
+- **User Account Management**: Create accounts for family members with specific relationships
+- **Login History**: Comprehensive audit trail of family member access
+- **Real-time Permissions**: Instantly grant or revoke monitoring access
+
+### 🔐 **Security & Privacy**  
+- **Relationship-Based Access**: Different permission levels based on family relationship
+- **Secure Sessions**: Automatic timeout and secure session management
+- **Activity Logging**: Track all user interactions for security purposes
+- **Password Policies**: Enforce strong passwords and mandatory password changes
 
 ---
 
@@ -352,8 +438,8 @@ We welcome contributions! Please feel free to:
 ### 📋 Development Setup
 ```bash
 # Fork the repository
-git clone https://github.com/your-fork/RTSP-Recorder.git
-cd RTSP-Recorder
+git clone https://github.com/your-fork/AI-Baby-Monitor.git
+cd AI-Baby-Monitor
 
 # Create virtual environment
 python -m venv venv
@@ -363,34 +449,71 @@ venv\Scripts\activate     # Windows
 
 # Install development dependencies
 pip install -r requirements.txt
-python baby_monitor.py
+
+# Set up environment variables
+cp .env.example .env
+# Edit .env with your RTSP camera details
+
+# Initialize database and run
+python app.py
+```
+
+#### **Testing Authentication Without RTSP**
+For testing user management features without a camera:
+```bash
+export AUTH_ONLY_MODE=true
+python app.py
 ```
 
 ---
 
-## 🏗️ Architecture Overview (v2.0)
+## 🏗️ Architecture Overview
 
-The application has been completely refactored into a modular architecture for better maintainability and extensibility:
+The application has evolved into a full-stack web-based monitoring system with Flask backend and real-time capabilities:
 
-### 📁 **Module Structure**
+### 📁 **Project Structure**
 ```
-RTSP-Recorder/
-├── baby_monitor.py         # 🚀 Main application entry point
+AI-Baby-Monitor/
+├── app.py                  # 🚀 Flask web application entry point
 ├── config/                 # ⚙️ Configuration management
-├── utils/                  # 🛠️ Utility functions  
-├── detection/              # 🤖 YOLO object detection
-├── tracking/               # 📍 DeepSORT tracking
-├── streaming/              # 📡 RTSP streaming
-├── recording/              # 🎥 Video recording
-├── monitoring/             # 👶 Sleep & safety monitoring
-└── visualization/          # 🎨 UI and rendering
+│   └── settings.py        # Application settings and RTSP config
+├── models/                 # �️ Database models
+│   ├── auth.py            # User authentication and login logs
+│   └── notification.py    # Notification system
+├── api/                    # 🌐 REST API endpoints
+│   ├── auth_route.py      # Authentication routes
+│   ├── monitor_route.py   # Monitoring endpoints
+│   ├── active_users_route.py # Real-time user tracking
+│   └── websocket_handlers.py # WebSocket for live streaming
+├── services/               # 🔧 Core business logic
+│   ├── detection/         # 🤖 YOLO object detection
+│   ├── tracking/          # 📍 DeepSORT tracking
+│   ├── streaming/         # 📡 RTSP streaming & web sockets
+│   ├── monitoring/        # 👶 Sleep & safety monitoring
+│   └── recording/         # 🎥 Video recording
+├── templates/              # 🎨 HTML templates
+│   ├── index.html         # Main dashboard
+│   └── auth/              # Authentication pages
+├── forms/                  # 📝 WTForms for user input
+└── utils/                  # 🛠️ Utility functions  
 ```
 
-### 🔄 **Component Flow**
+### 🔄 **System Flow**
 ```
-RTSP Stream → Detection → Tracking → Monitoring → Recording
-                                  ↘ Visualization ↗
+Browser ←→ Flask App ←→ WebSocket ←→ RTSP Stream
+    ↓         ↓                        ↓
+ Auth DB ← User Mgmt              AI Detection
+    ↓         ↓                        ↓
+Login Logs  Activity Track        Recording
 ```
+
+### 🌐 **Technology Stack**
+- **Backend**: Flask + Flask-SocketIO for real-time communication
+- **Database**: SQLite with SQLAlchemy ORM
+- **Authentication**: Flask-Login with session management
+- **Frontend**: HTML5, JavaScript, WebSocket for live streaming
+- **AI Processing**: YOLOv8 + OpenCV for computer vision
+- **Deployment**: Docker + Docker Compose
 
 ---
 

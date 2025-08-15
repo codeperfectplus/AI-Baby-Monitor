@@ -20,8 +20,6 @@ class Config:
     SNAPSHOTS_DIR = os.getenv("SNAPSHOTS_DIR",
                              "/app/data/snapshots" if os.path.exists("/app/data") 
                              else os.path.join(os.path.expanduser("~"), "baby-monitor-snapshots"))
-    os.makedirs(MONITOR_RECORDINGS_DIR, exist_ok=True)
-    os.makedirs(SNAPSHOTS_DIR, exist_ok=True)
     SEGMENT_MINUTES = 30  # length of each video file in minutes
     TIME_BLOCK_HOURS = 6  # how to split day into folders
     SHOW_PREVIEW = True  # True = show live preview, False = headless
@@ -29,9 +27,10 @@ class Config:
     
     # ==================== AI Model Settings ====================
     # Use Docker-compatible paths if running in container
-    MODEL_PATH = os.getenv("MODEL_PATH",
-                          os.path.join("/app/data/cache", "yolov8n.pt") if os.path.exists("/app/data")
-                          else os.path.join(os.path.expanduser("~"), ".cache", "yolov8n.pt"))
+    YOLO_MODEL_NAME = os.getenv("MODEL_NAME", "yolov8n.pt")
+    YOLO_MODEL_PATH = os.getenv("MODEL_PATH",
+                          os.path.join("/app/data/cache", YOLO_MODEL_NAME) if os.path.exists("/app/data")
+                          else os.path.join(os.path.expanduser("~"), ".cache", YOLO_MODEL_NAME))
     CONFIDENCE_THRESHOLD = 0.4  # detection confidence
     TARGET_FPS = 30.0  # reduced fps for CPU processing
     DEBUG_VIDEO = True  # enable extra video debugging output
