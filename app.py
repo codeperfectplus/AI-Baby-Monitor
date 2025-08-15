@@ -13,12 +13,18 @@ from api.websocket_handlers import register_socketio_events
 from services.streaming.streaming_service import initialize_streaming_service
 
 app = Flask(__name__)
-db_path = os.path.join(os.path.dirname(config.LOG_FILE), 'rtsp_monitor.db')
-app.config['SECRET_KEY'] = 'baby_monitor_secret_key_change_in_production'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{}'.format(db_path)
+app.config['SECRET_KEY'] = '23ysE&^!(*hqd88q7d8qdjhqe&(S^QW(69q7y6edqdq89dy7hqui'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///{}'.format(config.DATABASE_PATH)
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 socketio = SocketIO(app, cors_allowed_origins="*", async_mode='threading')
+
+os.makedirs(os.path.dirname(config.MONITOR_RECORDINGS_DIR), exist_ok=True)
+os.makedirs(os.path.dirname(config.SNAPSHOTS_DIR), exist_ok=True)
+os.makedirs(os.path.dirname(config.LOG_FILE), exist_ok=True)
+os.makedirs(os.path.dirname(config.YOLO_MODEL_PATH), exist_ok=True)
+os.makedirs(os.path.dirname(config.DATABASE_PATH), exist_ok=True)
+
 
 # Initialize authentication
 login_manager = LoginManager()

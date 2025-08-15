@@ -12,13 +12,17 @@ class Config:
 
     # ==================== RTSP Settings ====================
     RTSP_URL = os.getenv("RTSP_URL") 
+    DATABASE_PATH = os.getenv("DATABASE_PATH",
+                            os.path.join("/app/baby-monitor", "database.db") if os.path.exists("/app/baby-monitor")
+                            else os.path.join(os.path.expanduser("~"), "baby-monitor/database/database.db"))
+    RTSP_TIMEOUT = int(os.getenv("RTSP_TIMEOUT", 10))
     # ==================== Recording Settings ====================
     # Use Docker-compatible paths if running in container, otherwise use home directory
     MONITOR_RECORDINGS_DIR = os.getenv("RECORDINGS_DIR", 
-                                      "/app/data/recordings" if os.path.exists("/app/data") 
+                                      "/app/baby-monitor/recordings" if os.path.exists("/app/baby-monitor") 
                                       else os.path.join(os.path.expanduser("~"), "baby-monitor/recordings"))
     SNAPSHOTS_DIR = os.getenv("SNAPSHOTS_DIR",
-                             "/app/data/snapshots" if os.path.exists("/app/data") 
+                             "/app/baby-monitor/snapshots" if os.path.exists("/app/baby-monitor") 
                              else os.path.join(os.path.expanduser("~"), "baby-monitor/snapshots"))
     SEGMENT_MINUTES = 30  # length of each video file in minutes
     TIME_BLOCK_HOURS = 6  # how to split day into folders
@@ -29,7 +33,7 @@ class Config:
     # Use Docker-compatible paths if running in container
     YOLO_MODEL_NAME = os.getenv("MODEL_NAME", "yolov8n.pt")
     YOLO_MODEL_PATH = os.getenv("MODEL_PATH",
-                          os.path.join("/app/data/cache", YOLO_MODEL_NAME) if os.path.exists("/app/data")
+                          os.path.join("/app/baby-monitor/cache", YOLO_MODEL_NAME) if os.path.exists("/app/baby-monitor/cache")
                           else os.path.join(os.path.expanduser("~"), "baby-monitor/cache", YOLO_MODEL_NAME))
     CONFIDENCE_THRESHOLD = 0.4  # detection confidence
     TARGET_FPS = 30.0  # reduced fps for CPU processing
@@ -38,7 +42,7 @@ class Config:
     # ==================== Logging Settings ====================
     # Use Docker-compatible paths if running in container
     LOG_FILE = os.getenv("LOG_FILE",
-                        os.path.join("/app/data/logs", "detections.log") if os.path.exists("/app/data")
+                        os.path.join("/app/baby-monitor/logs", "detections.log") if os.path.exists("/app/baby-monitor/logs")
                         else os.path.join(os.path.expanduser("~"), "baby-monitor/logs", "detections.log"))
     NOTIFY_ON_PERSON = True  # OS notification for person/child alert
     
@@ -68,6 +72,12 @@ class Config:
     MAX_RETRIES = 5
     RETRY_DELAY = 3
     MAX_FAILURES = 30  # consecutive failures before reconnecting
+
+    # tracker settings
+    CHILD_HISTORY_SIZE = 30
+    CHILD_MIN_HISTORY = 5
+    CHILD_HEIGHT_RATIO_THRESHOLD = 0.50
+    CHILD_STABILITY_FRAMES = 3
 
 
 # Create global config instance

@@ -74,7 +74,15 @@ RUN if [ ! -f .env ]; then \
 EXPOSE 8847
 
 # Create snapshots directory for web app
-RUN mkdir -p /app/snapshots && chown -R appuser:appuser /app/snapshots
+RUN mkdir -p /app/snapshots && chown -R appuser:appuser /app/baby-monitor/snapshots
+# Create recordings directory for web app
+RUN mkdir -p /app/recordings && chown -R appuser:appuser /app/baby-monitor/recordings
+# Create logs directory for web app
+RUN mkdir -p /app/logs && chown -R appuser:appuser /app/baby-monitor/logs
+# Create cache directory for web app
+RUN mkdir -p /app/cache && chown -R appuser:appuser /app/baby-monitor/cache
+# Create database directory for web app
+RUN mkdir -p /app/database && chown -R appuser:appuser /app/baby-monitor/database
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \

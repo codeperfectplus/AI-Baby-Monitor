@@ -22,12 +22,14 @@ else
     echo "✅ .env file already exists"
 fi
 
+
 # Create directories on host
 echo "📁 Creating host directories..."
-mkdir -p "$HOME/ai-baby-monitor/recordings"
-mkdir -p "$HOME/ai-baby-monitor/snapshots"
-mkdir -p "$HOME/ai-baby-monitor/logs"
-mkdir -p "$HOME/ai-baby-monitor/.cache"
+mkdir -p "$HOME/baby-monitor/recordings"
+mkdir -p "$HOME/baby-monitor/snapshots"
+mkdir -p "$HOME/baby-monitor/logs"
+mkdir -p "$HOME/baby-monitor/cache"
+mkdir -p "$HOME/baby-monitor/database"
 
 # Build Docker image
 echo "🔨 Building Docker image..."

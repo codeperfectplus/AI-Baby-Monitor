@@ -47,7 +47,7 @@ class DeepSortTracker:
         # Config-driven parameters with graceful fallbacks
         self.history_size = getattr(config, "CHILD_HISTORY_SIZE", 30)
         self.min_history = getattr(config, "CHILD_MIN_HISTORY", 5)
-        self.height_ratio_threshold = getattr(config, "CHILD_HEIGHT_RATIO_THRESHOLD", 0.75)
+        self.height_ratio_threshold = getattr(config, "CHILD_HEIGHT_RATIO_THRESHOLD", 0.50)
         self.stability_frames = getattr(config, "CHILD_STABILITY_FRAMES", 3)
     
     def update_tracks(self, detections, frame):
