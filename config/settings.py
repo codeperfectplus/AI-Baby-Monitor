@@ -9,19 +9,9 @@ load_dotenv()
 
 class Config:
     """Main configuration class for RTSP Recorder"""
-    
+
     # ==================== RTSP Settings ====================
-    RTSP_USERNAME = os.getenv("RTSP_USERNAME", "username")
-    RTSP_PASSWORD = os.getenv("RTSP_PASSWORD", "password")
-    RTSP_IP = os.getenv("RTSP_IP", "192.168.1.3")
-    RTSP_PORT = int(os.getenv("RTSP_PORT", "554"))
-    RTSP_STREAM = os.getenv("RTSP_STREAM", "stream1")
-    
-    @property
-    def rtsp_url(self):
-        """Generate RTSP URL from configuration"""
-        return f"rtsp://{self.RTSP_USERNAME}:{self.RTSP_PASSWORD}@{self.RTSP_IP}:{self.RTSP_PORT}/{self.RTSP_STREAM}"
-    
+    RTSP_URL = os.getenv("RTSP_URL") 
     # ==================== Recording Settings ====================
     # Use Docker-compatible paths if running in container, otherwise use home directory
     MONITOR_RECORDINGS_DIR = os.getenv("RECORDINGS_DIR", 

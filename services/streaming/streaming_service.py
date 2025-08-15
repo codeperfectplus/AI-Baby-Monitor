@@ -148,7 +148,7 @@ class AIBabyMonitorStreamer(threading.Thread):
         self.tracker = DeepSortTracker()
         self.sleep_monitor = SleepMonitor()
         self.safety_monitor = SafetyMonitor()
-        self.reader = RTSPReader(config.rtsp_url)
+        self.reader = RTSPReader(config.RTSP_URL)
         
         # Initialize frame dimensions
         frame = None

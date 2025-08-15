@@ -12,11 +12,7 @@ services:
     
     # Environment variables
     environment:
-      - RTSP_USERNAME=${RTSP_USERNAME:-username}
-      - RTSP_PASSWORD=${RTSP_PASSWORD:-password}
-      - RTSP_IP=${RTSP_IP:-192.168.1.3}
-      - RTSP_PORT=${RTSP_PORT:-554}
-      - RTSP_STREAM=${RTSP_STREAM:-stream1}
+      - RTSP_URL=${RTSP_URL}
       - FLASK_ENV=production
       - PYTHONUNBUFFERED=1
     
