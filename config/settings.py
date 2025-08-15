@@ -73,6 +73,8 @@ class BabyMonitorSettings:
     CHILD_HEIGHT_RATIO_THRESHOLD = 0.50
     CHILD_STABILITY_FRAMES = 3
 
+    LOG_LEVEL = "INFO"
+
 
 # Create global config instance
 config = BabyMonitorSettings()
