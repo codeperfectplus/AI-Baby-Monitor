@@ -1,12 +1,10 @@
 services:
-  rtsp-recorder:
+  ai-baby-monitor:
     build: 
       context: .
       dockerfile: Dockerfile
-    container_name: rtsp-baby-monitor-web
+    container_name: AI-Baby-Monitor
     restart: unless-stopped
-    
-    # Port mapping for web interface
     ports:
       - "8847:8847"
     
@@ -19,23 +17,10 @@ services:
     # Volume mappings
     volumes:
       # Map recordings directory (MONITOR_RECORDINGS_DIR)
-      - ${HOME}/ai-baby-monitor/recordings:/app/data/recordings
-
-      # Map snapshots directory for web interface
-      - ${HOME}/ai-baby-monitor/snapshots:/app/data/snapshots
-
-      # Map cache directory for AI models (MODEL_PATH)
-      - ${HOME}/ai-baby-monitor/.cache:/app/data/cache
-
-      # Map logs directory (LOG_FILE)
-      - ${HOME}/ai-baby-monitor/logs:/app/data/logs
-      
-      # Map config if you want to modify externally
-      - ./config:/app/config
-    
+      - ${HOME}/baby-monitor:/app/baby-monitor
     # Health check override
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8847/"]
+      test: ["CMD", "curl", "-f", "http://localhost:8847/health"]
       interval: 30s
       timeout: 10s
       retries: 3
@@ -51,4 +36,5 @@ volumes:
 
 networks:
   default:
-    name: rtsp-network
+    name: baby-monitor-network
+    driver: bridge

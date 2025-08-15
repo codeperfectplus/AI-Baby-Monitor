@@ -7,23 +7,22 @@ from dotenv import load_dotenv
 # Load environment variables from .env file
 load_dotenv()
 
-class Config:
+class BabyMonitorSettings:
     """Main configuration class for RTSP Recorder"""
 
     # ==================== RTSP Settings ====================
     RTSP_URL = os.getenv("RTSP_URL") 
-    DATABASE_PATH = os.getenv("DATABASE_PATH",
-                            os.path.join("/app/baby-monitor", "database.db") if os.path.exists("/app/baby-monitor")
-                            else os.path.join(os.path.expanduser("~"), "baby-monitor/database/database.db"))
     RTSP_TIMEOUT = int(os.getenv("RTSP_TIMEOUT", 10))
-    # ==================== Recording Settings ====================
-    # Use Docker-compatible paths if running in container, otherwise use home directory
-    MONITOR_RECORDINGS_DIR = os.getenv("RECORDINGS_DIR", 
-                                      "/app/baby-monitor/recordings" if os.path.exists("/app/baby-monitor") 
-                                      else os.path.join(os.path.expanduser("~"), "baby-monitor/recordings"))
-    SNAPSHOTS_DIR = os.getenv("SNAPSHOTS_DIR",
-                             "/app/baby-monitor/snapshots" if os.path.exists("/app/baby-monitor") 
-                             else os.path.join(os.path.expanduser("~"), "baby-monitor/snapshots"))
+    YOLO_MODEL_NAME = os.getenv("MODEL_NAME", "yolov8n.pt")
+    
+    BASE_DIR = "/app/baby-monitor" if os.path.exists("/app/baby-monitor") else os.path.join(os.path.expanduser("~"), "baby-monitor")
+
+    YOLO_MODEL_PATH = os.path.join(BASE_DIR, "cache", YOLO_MODEL_NAME)
+    DATABASE_PATH = os.path.join(BASE_DIR, "database", "database.db")
+    LOG_FILE = os.path.join(BASE_DIR, "logs", "detections.log")
+    MONITOR_RECORDINGS_DIR = os.path.join(BASE_DIR, "recordings")
+    SNAPSHOTS_DIR = os.path.join(BASE_DIR, "snapshots")
+
     SEGMENT_MINUTES = 30  # length of each video file in minutes
     TIME_BLOCK_HOURS = 6  # how to split day into folders
     SHOW_PREVIEW = True  # True = show live preview, False = headless
@@ -31,19 +30,14 @@ class Config:
     
     # ==================== AI Model Settings ====================
     # Use Docker-compatible paths if running in container
-    YOLO_MODEL_NAME = os.getenv("MODEL_NAME", "yolov8n.pt")
-    YOLO_MODEL_PATH = os.getenv("MODEL_PATH",
-                          os.path.join("/app/baby-monitor/cache", YOLO_MODEL_NAME) if os.path.exists("/app/baby-monitor/cache")
-                          else os.path.join(os.path.expanduser("~"), "baby-monitor/cache", YOLO_MODEL_NAME))
+    
     CONFIDENCE_THRESHOLD = 0.4  # detection confidence
     TARGET_FPS = 30.0  # reduced fps for CPU processing
     DEBUG_VIDEO = True  # enable extra video debugging output
     
     # ==================== Logging Settings ====================
     # Use Docker-compatible paths if running in container
-    LOG_FILE = os.getenv("LOG_FILE",
-                        os.path.join("/app/baby-monitor/logs", "detections.log") if os.path.exists("/app/baby-monitor/logs")
-                        else os.path.join(os.path.expanduser("~"), "baby-monitor/logs", "detections.log"))
+    
     NOTIFY_ON_PERSON = True  # OS notification for person/child alert
     
     # ==================== Tracking Settings ====================
@@ -81,4 +75,4 @@ class Config:
 
 
 # Create global config instance
-config = Config()
+config = BabyMonitorSettings()

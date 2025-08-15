@@ -73,16 +73,11 @@ RUN if [ ! -f .env ]; then \
 # Expose Flask port (using less common port)
 EXPOSE 8847
 
-# Create snapshots directory for web app
-RUN mkdir -p /app/snapshots && chown -R appuser:appuser /app/baby-monitor/snapshots
-# Create recordings directory for web app
-RUN mkdir -p /app/recordings && chown -R appuser:appuser /app/baby-monitor/recordings
-# Create logs directory for web app
-RUN mkdir -p /app/logs && chown -R appuser:appuser /app/baby-monitor/logs
-# Create cache directory for web app
-RUN mkdir -p /app/cache && chown -R appuser:appuser /app/baby-monitor/cache
-# Create database directory for web app
-RUN mkdir -p /app/database && chown -R appuser:appuser /app/baby-monitor/database
+RUN mkdir -p /app/baby-monitor/snapshots && chown -R appuser:appuser /app/baby-monitor/snapshots
+RUN mkdir -p /app/baby-monitor/recordings && chown -R appuser:appuser /app/baby-monitor/recordings
+RUN mkdir -p /app/baby-monitor/logs && chown -R appuser:appuser /app/baby-monitor/logs
+RUN mkdir -p /app/baby-monitor/cache && chown -R appuser:appuser /app/baby-monitor/cache
+RUN mkdir -p /app/baby-monitor/database && chown -R appuser:appuser /app/baby-monitor/database
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
