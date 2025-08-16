@@ -15,7 +15,8 @@ class BabyMonitorSettings:
     RTSP_TIMEOUT = int(os.getenv("RTSP_TIMEOUT", 10))
     YOLO_MODEL_NAME = os.getenv("MODEL_NAME", "yolov8n.pt")
     
-    BASE_DIR = "/app/baby-monitor" if os.path.exists("/app/baby-monitor") else os.path.join(os.path.expanduser("~"), "baby-monitor")
+    BASE_DIR = "/app/baby-monitor" if os.path.exists("/app/baby-monitor") \
+        else os.path.join(os.path.expanduser("~"), "baby-monitor")
 
     YOLO_MODEL_PATH = os.path.join(BASE_DIR, "cache", YOLO_MODEL_NAME)
     DATABASE_PATH = os.path.join(BASE_DIR, "database", "database.db")
@@ -26,7 +27,7 @@ class BabyMonitorSettings:
     SEGMENT_MINUTES = 30  # length of each video file in minutes
     TIME_BLOCK_HOURS = 6  # how to split day into folders
     SHOW_PREVIEW = True  # True = show live preview, False = headless
-    SAVE_ANNOTATED = True  # True = save video with boxes; False = save raw frames
+    SAVE_ANNOTATED = True  # True = save video with boxes
     
     # ==================== AI Model Settings ====================
     # Use Docker-compatible paths if running in container
@@ -34,6 +35,7 @@ class BabyMonitorSettings:
     CONFIDENCE_THRESHOLD = 0.4  # detection confidence
     TARGET_FPS = 30.0  # reduced fps for CPU processing
     DEBUG_VIDEO = True  # enable extra video debugging output
+    
     # GPU usage flag
     USE_GPU = False
     GPU_DEVICE_INDEX = int(os.getenv("GPU_DEVICE_INDEX", 0))  # which GPU to use
@@ -44,7 +46,7 @@ class BabyMonitorSettings:
     NOTIFY_ON_PERSON = True  # OS notification for person/child alert
     
     # ==================== Tracking Settings ====================
-    MANUAL_CHILD_SELECT = True  # click on the child once to lock on their track id
+    MANUAL_CHILD_SELECT = False  # click on the child once to lock on their track id
     AUTO_SELECT_SMALLEST = True  # if not manually selected, pick smallest person bbox
     
     # ==================== Safety Settings ====================
