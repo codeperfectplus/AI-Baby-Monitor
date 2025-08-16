@@ -9,6 +9,7 @@ from api.auth_route import auth_bp
 from api.metrics_route import metrics_bp
 from api.monitor_route import monitor_bp
 from api.notification_route import notification_bp
+from api.error_handlers import errors_bp
 from api.websocket_handlers import register_socketio_events
 from services.streaming.streaming_service import initialize_streaming_service
 
@@ -42,6 +43,7 @@ app.register_blueprint(auth_bp, url_prefix='/auth')
 app.register_blueprint(metrics_bp)
 app.register_blueprint(monitor_bp)
 app.register_blueprint(notification_bp)
+app.register_blueprint(errors_bp)
 
 # Import and register active users blueprint
 from api.active_users_route import active_users_bp

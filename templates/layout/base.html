@@ -16,19 +16,44 @@
     <link href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css" rel="stylesheet">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/styles.css') }}" />
     {% block head_extra %}{% endblock %}
+    <style>
+        /* Sidebar layout adjustments */
+        .app-shell { display: flex; min-height: 100vh; }
+        .sidebar { width: 250px; flex-shrink:0; position: fixed; top: 0; left: 0; height: 100vh; z-index: 50; }
+        .main-content { margin-left: 250px; flex: 1; }
+        @media (max-width: 1024px){
+            .sidebar { transform: translateX(-100%); transition: transform .3s ease; z-index:60; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0; }
+            .sidebar-backdrop { position:fixed; inset:0; background:rgba(0,0,0,0.5); backdrop-filter: blur(2px); z-index:50; display:none; }
+            .sidebar-backdrop.show { display:block; }
+        }
+    </style>
 </head>
 <body class="text-white">
     {% include 'partials/particles.html' %}
     {% include 'partials/floating_particles.html' %}
-    {% include 'partials/navbar.html' %}
 
-    <div class="container mx-auto px-6 pt-24 pb-12">
-        {% block content %}{% endblock %}
+    <div class="app-shell">
+        {% include 'partials/sidebar.html' %}
+        <main class="main-content px-6 pb-12 pt-10 lg:pt-8 overflow-x-hidden">
+            {% block content %}{% endblock %}
+        </main>
     </div>
 
     {% include 'partials/shortcuts_modal.html' %}
 
     <script src="{{ url_for('static', filename='js/particle_animation.js') }}"></script>
+    <script>
+        // Mobile sidebar toggle
+        const sidebarToggleBtn = document.getElementById('sidebar-toggle-btn');
+        const sidebarEl = document.getElementById('app-sidebar');
+        const sidebarBackdrop = document.getElementById('sidebar-backdrop');
+        function closeSidebar(){ if(sidebarEl) sidebarEl.classList.remove('open'); if(sidebarBackdrop) sidebarBackdrop.classList.remove('show'); }
+        function openSidebar(){ if(sidebarEl) sidebarEl.classList.add('open'); if(sidebarBackdrop) sidebarBackdrop.classList.add('show'); }
+        if(sidebarToggleBtn){ sidebarToggleBtn.addEventListener('click', ()=>{ if(sidebarEl.classList.contains('open')){ closeSidebar(); } else { openSidebar(); } }); }
+        if(sidebarBackdrop){ sidebarBackdrop.addEventListener('click', closeSidebar); }
+    </script>
     {% block scripts %}{% endblock %}
 </body>
 </html>

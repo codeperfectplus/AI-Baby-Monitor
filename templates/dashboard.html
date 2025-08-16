@@ -11,7 +11,7 @@
             </div>
         </div>
         <div class="lg:col-span-1">
-            <div class="sticky top-28 space-y-6 scrollbar-hide max-h-screen overflow-y-auto">
+            <div class="sticky top-24 space-y-6 scrollbar-hide max-h-screen overflow-y-auto">
                 {% include 'partials/sidebar_ai_features.html' %}
                 {% include 'partials/sidebar_active_viewers.html' %}
                 {% include 'partials/sidebar_system_status.html' %}
@@ -21,10 +21,5 @@
     </div>
 {% endblock %}
 {% block scripts %}
-<script>
-// Moved JS logic from original index.html. For brevity, you should refactor into separate static JS files.
-// Keep placeholders to avoid breaking functionality. You can progressively extract into modular .js.
-</script>
-   <script src="{{ url_for('static', filename='js/particle_animation.js') }}"></script>
-     {% include 'scripts/dashboard.html' %}
+    {% include 'scripts/script_components.html' %}
 {% endblock %}

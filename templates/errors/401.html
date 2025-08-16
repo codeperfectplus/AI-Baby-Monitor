@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>401 - Unauthorized | AI Baby Monitor</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👶</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0a1e 0%, #1e1b3a 50%, #2d1b69 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(239, 68, 68, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            border-radius: 1.5rem;
+            pointer-events: none;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00f5ff 0%, #7c3aed 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 245, 255, 0.4);
+        }
+
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .lock-shake {
+            animation: shake 0.5s infinite alternate;
+        }
+
+        .guardian-eyes {
+            animation: watchful 4s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes shake {
+            0% { transform: rotate(-5deg); }
+            100% { transform: rotate(5deg); }
+        }
+
+        @keyframes watchful {
+            0%, 100% { transform: translateX(0px); }
+            50% { transform: translateX(5px); }
+        }
+
+        #particles-js {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            pointer-events: none;
+            opacity: 0.85;
+        }
+
+        .error-image {
+            max-width: 300px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .guardian-svg {
+            filter: drop-shadow(0 0 20px rgba(239, 68, 68, 0.3));
+        }
+
+        .pulse-red {
+            animation: pulseRed 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseRed {
+            from {
+                box-shadow: 0 0 20px rgba(239, 68, 68, 0.3);
+            }
+            to {
+                box-shadow: 0 0 40px rgba(239, 68, 68, 0.5);
+            }
+        }
+
+        .warning-glow {
+            animation: warningGlow 1.5s ease-in-out infinite;
+        }
+
+        @keyframes warningGlow {
+            0%, 100% { 
+                text-shadow: 0 0 10px rgba(239, 68, 68, 0.5);
+                transform: scale(1);
+            }
+            50% { 
+                text-shadow: 0 0 20px rgba(239, 68, 68, 0.8);
+                transform: scale(1.05);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 text-white">
+    <!-- Particles.js background -->
+    <div id="particles-js"></div>
+
+    <div class="max-w-2xl w-full text-center relative z-10">
+        <!-- Error Card -->
+        <div class="glass-card rounded-3xl p-8 lg:p-12 pulse-red">
+            <!-- Error Image/Illustration -->
+            <div class="error-image mb-8 floating-animation">
+                <svg class="guardian-svg w-full h-auto" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Guardian Shield -->
+                    <path d="M 200 60 L 160 80 L 160 160 Q 160 200 200 220 Q 240 200 240 160 L 240 80 Z" fill="#DC2626" opacity="0.8"/>
+                    
+                    <!-- Shield Border -->
+                    <path d="M 200 60 L 160 80 L 160 160 Q 160 200 200 220 Q 240 200 240 160 L 240 80 Z" fill="none" stroke="#EF4444" stroke-width="3"/>
+                    
+                    <!-- Lock Symbol -->
+                    <rect class="lock-shake" x="185" y="120" width="30" height="40" rx="5" fill="#FBBF24"/>
+                    <path class="lock-shake" d="M 190 120 L 190 110 Q 190 100 200 100 Q 210 100 210 110 L 210 120" fill="none" stroke="#FBBF24" stroke-width="4"/>
+                    
+                    <!-- Guardian Eyes -->
+                    <circle class="guardian-eyes" cx="185" cy="90" r="5" fill="#FEF3C7"/>
+                    <circle class="guardian-eyes" cx="215" cy="90" r="5" fill="#FEF3C7"/>
+                    <circle cx="185" cy="90" r="2" fill="#DC2626"/>
+                    <circle cx="215" cy="90" r="2" fill="#DC2626"/>
+                    
+                    <!-- 401 Text -->
+                    <text x="200" y="105" text-anchor="middle" fill="white" font-size="16" font-weight="bold">401</text>
+                    
+                    <!-- Warning Signs -->
+                    <polygon points="120,240 140,240 130,220" fill="#FBBF24"/>
+                    <text x="130" y="235" text-anchor="middle" fill="#DC2626" font-size="12" font-weight="bold">!</text>
+                    
+                    <polygon points="260,240 280,240 270,220" fill="#FBBF24"/>
+                    <text x="270" y="235" text-anchor="middle" fill="#DC2626" font-size="12" font-weight="bold">!</text>
+                    
+                    <!-- Access Denied Symbol -->
+                    <circle cx="200" cy="180" r="20" fill="none" stroke="#EF4444" stroke-width="4"/>
+                    <line x1="190" y1="170" x2="210" y2="190" stroke="#EF4444" stroke-width="4"/>
+                </svg>
+            </div>
+            
+            <!-- Error Content -->
+            <div class="space-y-6">
+                <div>
+                    <h1 class="text-6xl lg:text-8xl font-bold gradient-text mb-4 warning-glow">401</h1>
+                    <h2 class="text-2xl lg:text-3xl font-bold text-white mb-2">Access Denied</h2>
+                    <p class="text-gray-300 text-lg">You don't have permission to access this area of the baby monitor.</p>
+                </div>
+                
+                <div class="bg-red-500/10 border border-red-400/30 rounded-lg p-4 text-red-300">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-shield-alt text-red-400"></i>
+                        <span class="font-semibold">Security Alert</span>
+                    </div>
+                    <p class="text-sm">This area requires special authorization to protect your baby's privacy and safety.</p>
+                </div>
+                
+                <!-- Reasons List -->
+                <div class="bg-yellow-500/10 border border-yellow-400/30 rounded-lg p-4 text-left">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fas fa-exclamation-triangle text-yellow-400"></i>
+                        <span class="font-semibold text-yellow-300">Possible reasons:</span>
+                    </div>
+                    <ul class="text-sm text-gray-300 space-y-1">
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-circle text-yellow-400 text-xs"></i>
+                            You need to log in to access this page
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-circle text-yellow-400 text-xs"></i>
+                            Your session has expired
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-circle text-yellow-400 text-xs"></i>
+                            You don't have the required permissions
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-circle text-yellow-400 text-xs"></i>
+                            Admin-only area requires special access
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
+                    <a href="{{ url_for('auth.login') }}" class="btn-primary px-8 py-3 rounded-lg font-semibold text-white inline-flex items-center gap-2">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login
+                    </a>
+                    <a href="{{ url_for('index') }}" class="px-8 py-3 rounded-lg font-semibold text-cyan-400 border border-cyan-400/50 hover:bg-cyan-400/10 transition-all duration-300 inline-flex items-center gap-2">
+                        <i class="fas fa-home"></i>
+                        Go Home
+                    </a>
+                </div>
+                
+                <!-- Help Section -->
+                <div class="pt-8 border-t border-white/10">
+                    <p class="text-gray-400 text-sm mb-4">Need help? Contact your administrator:</p>
+                    <div class="flex flex-wrap justify-center gap-3">
+                        <div class="text-cyan-400 text-sm inline-flex items-center gap-1 px-3 py-1 rounded-full bg-cyan-400/10">
+                            <i class="fas fa-envelope text-xs"></i>
+                            admin@babysafety.com
+                        </div>
+                        <div class="text-purple-400 text-sm inline-flex items-center gap-1 px-3 py-1 rounded-full bg-purple-400/10">
+                            <i class="fas fa-phone text-xs"></i>
+                            Support Line
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-8">
+            <div class="flex justify-center items-center gap-2 mb-2">
+                <i class="fas fa-baby text-cyan-400"></i>
+                <span class="text-gray-400 text-sm">AI Baby Monitor - Protected & Private</span>
+                <i class="fas fa-lock text-red-400"></i>
+            </div>
+            <p class="text-gray-500 text-xs">
+                &copy; 2025 Code Perfect Plus - Your baby's security is our responsibility
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Particles.js initialization with red theme
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 35, density: { enable: true, value_area: 800 } },
+                color: { value: ['#ef4444', '#dc2626', '#7c3aed'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.3, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
+                size: { value: 3, random: true, anim: { enable: true, speed: 2, size_min: 0.1, sync: false } },
+                line_linked: { enable: true, distance: 150, color: '#ef4444', opacity: 0.2, width: 1 },
+                move: { enable: true, speed: 1, direction: 'none', random: true, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+                modes: { repulse: { distance: 120, duration: 0.4 }, push: { particles_nb: 2 } }
+            },
+            retina_detect: true
+        });
+
+        // Add interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click effect to shield
+            const shield = document.querySelector('.guardian-svg');
+            shield.addEventListener('click', function() {
+                this.style.transform = 'scale(1.1) rotate(5deg)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1) rotate(0deg)';
+                }, 200);
+            });
+        });
+    </script>
+</body>
+</html>

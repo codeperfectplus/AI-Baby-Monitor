@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>500 - Server Error | AI Baby Monitor</title>
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>👶</text></svg>">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
+        
+        * {
+            font-family: 'Inter', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #0c0a1e 0%, #1e1b3a 50%, #2d1b69 100%);
+            min-height: 100vh;
+            position: relative;
+            overflow: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                radial-gradient(circle at 20% 80%, rgba(245, 158, 11, 0.1) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(124, 58, 237, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+        }
+        
+        .glass-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(25px);
+            border: 2px solid rgba(255, 255, 255, 0.15);
+            box-shadow: 
+                0 25px 50px -12px rgba(0, 0, 0, 0.5),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+            position: relative;
+        }
+
+        .glass-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.1) 0%, transparent 100%);
+            border-radius: 1.5rem;
+            pointer-events: none;
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #00f5ff 0%, #7c3aed 100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn-primary::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: left 0.5s;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px) scale(1.05);
+            box-shadow: 0 15px 35px rgba(0, 245, 255, 0.4);
+        }
+
+        .floating-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        .robot-head {
+            animation: robotThink 3s ease-in-out infinite;
+        }
+
+        .robot-eyes {
+            animation: robotBlink 4s infinite;
+        }
+
+        .error-sparks {
+            animation: spark 2s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+
+        @keyframes robotThink {
+            0%, 100% { transform: rotate(-2deg); }
+            50% { transform: rotate(2deg); }
+        }
+
+        @keyframes robotBlink {
+            0%, 90%, 100% { opacity: 1; }
+            95% { opacity: 0.3; }
+        }
+
+        @keyframes spark {
+            0%, 100% { 
+                opacity: 0.3;
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 1;
+                transform: scale(1.2);
+            }
+        }
+
+        #particles-js {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2;
+            pointer-events: none;
+            opacity: 0.85;
+        }
+
+        .error-image {
+            max-width: 300px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .robot-svg {
+            filter: drop-shadow(0 0 20px rgba(245, 158, 11, 0.3));
+        }
+
+        .pulse-yellow {
+            animation: pulseYellow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes pulseYellow {
+            from {
+                box-shadow: 0 0 20px rgba(245, 158, 11, 0.3);
+            }
+            to {
+                box-shadow: 0 0 40px rgba(245, 158, 11, 0.5);
+            }
+        }
+
+        .error-text {
+            animation: errorGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes errorGlow {
+            0%, 100% { 
+                text-shadow: 0 0 10px rgba(245, 158, 11, 0.5);
+            }
+            50% { 
+                text-shadow: 0 0 20px rgba(245, 158, 11, 0.8);
+            }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-4 text-white">
+    <!-- Particles.js background -->
+    <div id="particles-js"></div>
+
+    <div class="max-w-2xl w-full text-center relative z-10">
+        <!-- Error Card -->
+        <div class="glass-card rounded-3xl p-8 lg:p-12 pulse-yellow">
+            <!-- Error Image/Illustration -->
+            <div class="error-image mb-8 floating-animation">
+                <svg class="robot-svg w-full h-auto" viewBox="0 0 400 300" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Robot Body -->
+                    <rect x="150" y="180" width="100" height="80" rx="15" fill="#374151"/>
+                    <rect x="155" y="185" width="90" height="70" rx="10" fill="#4B5563"/>
+                    
+                    <!-- Robot Head -->
+                    <rect class="robot-head" x="160" y="120" width="80" height="70" rx="20" fill="#6B7280"/>
+                    <rect x="165" y="125" width="70" height="60" rx="15" fill="#9CA3AF"/>
+                    
+                    <!-- Robot Eyes -->
+                    <circle class="robot-eyes" cx="180" cy="150" r="8" fill="#F59E0B"/>
+                    <circle class="robot-eyes" cx="220" cy="150" r="8" fill="#F59E0B"/>
+                    <circle cx="180" cy="150" r="4" fill="#D97706"/>
+                    <circle cx="220" cy="150" r="4" fill="#D97706"/>
+                    
+                    <!-- Error Display Screen -->
+                    <rect x="170" y="160" width="60" height="20" rx="5" fill="#1F2937"/>
+                    <text x="200" y="173" text-anchor="middle" fill="#F59E0B" font-size="10" font-weight="bold">ERROR 500</text>
+                    
+                    <!-- Robot Antenna -->
+                    <line x1="200" y1="120" x2="200" y2="100" stroke="#9CA3AF" stroke-width="3"/>
+                    <circle class="error-sparks" cx="200" cy="100" r="6" fill="#F59E0B"/>
+                    
+                    <!-- Error Sparks -->
+                    <circle class="error-sparks" cx="180" cy="110" r="3" fill="#FBBF24"/>
+                    <circle class="error-sparks" cx="220" cy="115" r="2" fill="#FCD34D"/>
+                    <circle class="error-sparks" cx="160" cy="130" r="2" fill="#F59E0B"/>
+                    <circle class="error-sparks" cx="240" cy="125" r="3" fill="#FBBF24"/>
+                    
+                    <!-- Robot Arms -->
+                    <rect x="120" y="200" width="30" height="15" rx="7" fill="#6B7280" transform="rotate(-20 135 207)"/>
+                    <rect x="250" y="200" width="30" height="15" rx="7" fill="#6B7280" transform="rotate(20 265 207)"/>
+                    
+                    <!-- Robot Legs -->
+                    <rect x="165" y="260" width="15" height="30" rx="7" fill="#4B5563"/>
+                    <rect x="220" y="260" width="15" height="30" rx="7" fill="#4B5563"/>
+                    
+                    <!-- Tools/Wrench -->
+                    <path d="M 110 180 L 125 165 L 130 170 L 115 185 Z" fill="#9CA3AF"/>
+                    <circle cx="125" cy="165" r="3" fill="#F59E0B"/>
+                    
+                    <!-- Warning Triangle -->
+                    <polygon points="300,200 320,240 280,240" fill="#F59E0B"/>
+                    <text x="300" y="230" text-anchor="middle" fill="#1F2937" font-size="14" font-weight="bold">!</text>
+                </svg>
+            </div>
+            
+            <!-- Error Content -->
+            <div class="space-y-6">
+                <div>
+                    <h1 class="text-6xl lg:text-8xl font-bold gradient-text mb-4 error-text">500</h1>
+                    <h2 class="text-2xl lg:text-3xl font-bold text-white mb-2">Internal Server Error</h2>
+                    <p class="text-gray-300 text-lg">Our baby monitoring system encountered an unexpected problem!</p>
+                </div>
+                
+                <div class="bg-yellow-500/10 border border-yellow-400/30 rounded-lg p-4 text-yellow-300">
+                    <div class="flex items-center gap-2 mb-2">
+                        <i class="fas fa-cogs text-yellow-400"></i>
+                        <span class="font-semibold">System Status</span>
+                    </div>
+                    <p class="text-sm">The server is experiencing technical difficulties. Our engineering team has been notified and is working on a fix.</p>
+                </div>
+                
+                <!-- What to do section -->
+                <div class="bg-blue-500/10 border border-blue-400/30 rounded-lg p-4 text-left">
+                    <div class="flex items-center gap-2 mb-3">
+                        <i class="fas fa-tools text-blue-400"></i>
+                        <span class="font-semibold text-blue-300">What you can do:</span>
+                    </div>
+                    <ul class="text-sm text-gray-300 space-y-2">
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-refresh text-blue-400 text-xs"></i>
+                            Refresh the page and try again
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-clock text-blue-400 text-xs"></i>
+                            Wait a few minutes for our systems to recover
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-phone text-blue-400 text-xs"></i>
+                            Contact support if the problem persists
+                        </li>
+                        <li class="flex items-center gap-2">
+                            <i class="fas fa-home text-blue-400 text-xs"></i>
+                            Return to the homepage for basic functionality
+                        </li>
+                    </ul>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div class="flex flex-col sm:flex-row gap-4 justify-center items-center pt-6">
+                    <button onclick="window.location.reload()" class="btn-primary px-8 py-3 rounded-lg font-semibold text-white inline-flex items-center gap-2">
+                        <i class="fas fa-sync-alt"></i>
+                        Try Again
+                    </button>
+                    <a href="{{ url_for('index') }}" class="px-8 py-3 rounded-lg font-semibold text-cyan-400 border border-cyan-400/50 hover:bg-cyan-400/10 transition-all duration-300 inline-flex items-center gap-2">
+                        <i class="fas fa-home"></i>
+                        Go Home
+                    </a>
+                </div>
+                
+                <!-- Support Section -->
+                <div class="pt-8 border-t border-white/10">
+                    <p class="text-gray-400 text-sm mb-4">If this problem continues, please contact our support team:</p>
+                    <div class="flex flex-wrap justify-center gap-3">
+                        <div class="text-cyan-400 text-sm inline-flex items-center gap-1 px-3 py-1 rounded-full bg-cyan-400/10">
+                            <i class="fas fa-envelope text-xs"></i>
+                            support@aibabymonitor.com
+                        </div>
+                        <div class="text-green-400 text-sm inline-flex items-center gap-1 px-3 py-1 rounded-full bg-green-400/10">
+                            <i class="fas fa-comments text-xs"></i>
+                            Live Chat
+                        </div>
+                        <div class="text-purple-400 text-sm inline-flex items-center gap-1 px-3 py-1 rounded-full bg-purple-400/10">
+                            <i class="fas fa-phone text-xs"></i>
+                            24/7 Support
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="text-center mt-8">
+            <div class="flex justify-center items-center gap-2 mb-2">
+                <i class="fas fa-baby text-cyan-400"></i>
+                <span class="text-gray-400 text-sm">AI Baby Monitor - We're fixing this!</span>
+                <i class="fas fa-wrench text-yellow-400"></i>
+            </div>
+            <p class="text-gray-500 text-xs">
+                &copy; 2025 Code Perfect Plus - Error ID: {{ error_id if error_id else 'ABM-' + moment().format('YYYYMMDD-HHmmss') }}
+            </p>
+        </div>
+    </div>
+
+    <script>
+        // Particles.js initialization with yellow/orange theme
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 45, density: { enable: true, value_area: 800 } },
+                color: { value: ['#f59e0b', '#d97706', '#7c3aed'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.3, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
+                size: { value: 3, random: true, anim: { enable: true, speed: 2, size_min: 0.1, sync: false } },
+                line_linked: { enable: true, distance: 150, color: '#f59e0b', opacity: 0.2, width: 1 },
+                move: { enable: true, speed: 1, direction: 'none', random: true, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+                modes: { repulse: { distance: 100, duration: 0.4 }, push: { particles_nb: 2 } }
+            },
+            retina_detect: true
+        });
+
+        // Add interactive effects
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add click effect to robot
+            const robot = document.querySelector('.robot-svg');
+            robot.addEventListener('click', function() {
+                this.style.transform = 'scale(1.1) rotate(-5deg)';
+                setTimeout(() => {
+                    this.style.transform = 'scale(1) rotate(0deg)';
+                }, 200);
+            });
+
+            // Auto-refresh option after 30 seconds
+            setTimeout(() => {
+                if (confirm('Would you like to try refreshing the page automatically?')) {
+                    window.location.reload();
+                }
+            }, 30000);
+        });
+    </script>
+</body>
+</html>
