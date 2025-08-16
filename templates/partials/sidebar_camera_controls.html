@@ -1,0 +1,545 @@
+<!-- Camera Controls -->
+<div class="glass-card rounded-2xl p-6 hover-lift" data-aos="fade-left" data-aos-delay="200">
+    <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+        <i class="fas fa-video text-cyan-400"></i>
+        Camera Controls
+    </h3>
+    
+    <!-- Camera Basic Info -->
+    <div class="mb-6">
+        <h4 class="text-lg font-semibold mb-3 text-gray-200">Device Info</h4>
+        <div class="space-y-2 text-sm">
+            <div class="flex justify-between">
+                <span class="text-gray-400">Model:</span>
+                <span class="text-white" id="camera-model">Loading...</span>
+            </div>
+            <div class="flex justify-between">
+                <span class="text-gray-400">Status:</span>
+                <span class="text-green-400" id="camera-status">
+                    <i class="fas fa-circle text-xs"></i> Online
+                </span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Mode Control -->
+    <div class="mb-6">
+        <h4 class="text-lg font-semibold mb-3 text-gray-200">Privacy Mode</h4>
+        <div class="flex items-center justify-between">
+            <span class="text-gray-300">Privacy Shield</span>
+            <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" id="privacy-toggle" class="sr-only peer" onchange="togglePrivacyMode()">
+                <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+            </label>
+        </div>
+        <p class="text-xs text-gray-400 mt-2" id="privacy-status">Privacy mode disabled</p>
+    </div>
+
+    <!-- Preset Positions -->
+    <div class="mb-4">
+        <h4 class="text-lg font-semibold mb-3 text-gray-200 flex items-center justify-between">
+            Preset Positions
+            <button onclick="refreshPresets()" class="text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </h4>
+        <div class="mb-3">
+            <select id="preset-dropdown" onchange="handlePresetSelection()" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500">
+                <option value="">Select a preset position...</option>
+            </select>
+        </div>
+        <button onclick="goToSelectedPreset()" class="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 px-3 py-2 rounded-lg text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2" id="go-to-preset-btn" disabled>
+            <i class="fas fa-map-marker-alt text-xs"></i>
+            Go to Position
+        </button>
+    </div>
+
+    <!-- Quick Actions -->
+    <div class="flex gap-2">
+        <button onclick="refreshCameraInfo()" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-3 py-2 rounded-lg text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1">
+            <i class="fas fa-sync-alt text-xs"></i>
+            Refresh Status
+        </button>
+    </div>
+</div>
+
+<style>
+.preset-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.2s ease;
+}
+
+.preset-item:hover {
+    background: rgba(0, 245, 255, 0.1);
+    border-color: rgba(0, 245, 255, 0.3);
+}
+
+.preset-item.active {
+    background: rgba(0, 245, 255, 0.2);
+    border-color: rgba(0, 245, 255, 0.5);
+}
+
+#preset-dropdown {
+    transition: all 0.2s ease;
+}
+
+#preset-dropdown:focus {
+    box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+}
+
+#preset-dropdown:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#go-to-preset-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+}
+</style>
+
+<script>
+// Camera control functions
+async function togglePrivacyMode() {
+    const toggle = document.getElementById('privacy-toggle');
+    const status = document.getElementById('privacy-status');
+    
+    try {
+        const response = await fetch('/api/camera/privacy', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                enabled: toggle.checked
+            })
+        });
+        
+        if (response.ok) {
+            const statusText = toggle.checked ? 'enabled' : 'disabled';
+            status.textContent = `Privacy mode ${statusText}`;
+            showCameraNotification(`Privacy mode ${statusText}`, 'success');
+        } else {
+            toggle.checked = !toggle.checked; // Revert on failure
+            showCameraNotification('Failed to toggle privacy mode', 'error');
+        }
+    } catch (error) {
+        console.error('Error toggling privacy mode:', error);
+        toggle.checked = !toggle.checked; // Revert on failure
+        showCameraNotification('Privacy mode toggle failed', 'error');
+    }
+}
+
+async function setPreset(presetId) {
+    try {
+        const response = await fetch(`/api/camera/preset/${presetId}`, {
+            method: 'POST'
+        });
+        
+        if (response.ok) {
+            showCameraNotification(`Camera moved to preset ${presetId}`, 'success');
+            // Update dropdown to show current selection
+            const dropdown = document.getElementById('preset-dropdown');
+            dropdown.value = presetId;
+        } else {
+            showCameraNotification('Failed to set camera preset', 'error');
+        }
+    } catch (error) {
+        console.error('Error setting camera preset:', error);
+        showCameraNotification('Camera preset failed', 'error');
+    }
+}
+
+function handlePresetSelection() {
+    const dropdown = document.getElementById('preset-dropdown');
+    const goButton = document.getElementById('go-to-preset-btn');
+    
+    if (dropdown.value) {
+        goButton.disabled = false;
+        goButton.classList.remove('opacity-50', 'cursor-not-allowed');
+    } else {
+        goButton.disabled = true;
+        goButton.classList.add('opacity-50', 'cursor-not-allowed');
+    }
+}
+
+function goToSelectedPreset() {
+    const dropdown = document.getElementById('preset-dropdown');
+    const presetId = dropdown.value;
+    
+    if (presetId) {
+        setPreset(parseInt(presetId));
+    }
+}
+
+async function refreshPresets() {
+    try {
+        const response = await fetch('/api/camera/presets');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        const dropdown = document.getElementById('preset-dropdown');
+        
+        if (!dropdown) return false;
+        
+        // Clear existing options except the first one
+        dropdown.innerHTML = '<option value="">Select a preset position...</option>';
+        
+        if (data.success && data.presets && data.presets.length > 0) {
+            data.presets.forEach(preset => {
+                const option = document.createElement('option');
+                option.value = preset.id;
+                option.textContent = preset.name || `Preset ${preset.id}`;
+                dropdown.appendChild(option);
+            });
+        } else {
+            // Add a message when no presets are available
+            const option = document.createElement('option');
+            option.value = '';
+            option.textContent = 'No presets available';
+            option.disabled = true;
+            dropdown.appendChild(option);
+        }
+        
+        // Reset the go button state
+        handlePresetSelection();
+        return true;
+        
+    } catch (error) {
+        console.error('Error loading presets:', error);
+        
+        const dropdown = document.getElementById('preset-dropdown');
+        if (dropdown) {
+            dropdown.innerHTML = '<option value="">Failed to load presets</option>';
+        }
+        
+        return false;
+    }
+}
+
+async function refreshCameraInfo() {
+    try {
+        console.log('🔄 Refreshing camera info...');
+        const response = await fetch('/api/camera/info');
+        
+        if (!response.ok) {
+            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+        }
+        
+        const data = await response.json();
+        console.log('📊 Camera info received:', data);
+        
+        // Update device model
+        const modelElement = document.getElementById('camera-model');
+        if (modelElement) {
+            modelElement.textContent = data.device_model || 'Unknown';
+        }
+        
+        // Update connection status
+        const statusElement = document.getElementById('camera-status');
+        if (statusElement) {
+            if (data.success) {
+                statusElement.innerHTML = '<i class="fas fa-circle text-xs"></i> Online';
+                statusElement.className = 'text-green-400';
+            } else {
+                const statusText = data.connection_status === 'disabled' ? 'Disabled' : 'Offline';
+                statusElement.innerHTML = `<i class="fas fa-circle text-xs"></i> ${statusText}`;
+                statusElement.className = data.connection_status === 'disabled' ? 'text-gray-400' : 'text-red-400';
+            }
+        }
+        
+        // Update privacy mode with explicit handling
+        const toggle = document.getElementById('privacy-toggle');
+        const status = document.getElementById('privacy-status');
+        
+        if (toggle && status) {
+            // Ensure privacy_mode is properly interpreted
+            const privacyEnabled = Boolean(data.privacy_mode);
+            
+            console.log(`🔒 Privacy mode status: ${privacyEnabled} (raw: ${data.privacy_mode})`);
+            
+            // Update toggle state
+            toggle.checked = privacyEnabled;
+            
+            // Update status text
+            const statusText = privacyEnabled ? 'enabled' : 'disabled';
+            status.textContent = `Privacy mode ${statusText}`;
+            
+            // Add visual feedback class
+            status.className = privacyEnabled ? 'text-xs text-orange-400 mt-2' : 'text-xs text-gray-400 mt-2';
+            
+            console.log(`✅ Privacy mode UI updated: toggle=${toggle.checked}, status="${status.textContent}"`);
+        } else {
+            console.error('❌ Privacy mode elements not found!');
+        }
+        
+        // Enable/disable controls based on camera availability
+        enableCameraControls(data.success);
+        
+        // Show info message for disabled camera
+        if (!data.success && data.connection_status === 'disabled') {
+            showCameraNotification('Camera control is disabled. Enable in .env settings.', 'info');
+        }
+        
+        console.log('✅ Camera info refresh complete');
+        return data.success;
+        
+    } catch (error) {
+        console.error('❌ Error refreshing camera info:', error);
+        
+        // Update UI for error state
+        const modelElement = document.getElementById('camera-model');
+        const statusElement = document.getElementById('camera-status');
+        
+        if (modelElement) modelElement.textContent = 'Error';
+        if (statusElement) {
+            statusElement.innerHTML = '<i class="fas fa-circle text-xs"></i> Error';
+            statusElement.className = 'text-red-400';
+        }
+        
+        // Set privacy mode to disabled on error
+        const toggle = document.getElementById('privacy-toggle');
+        const status = document.getElementById('privacy-status');
+        if (toggle && status) {
+            toggle.checked = false;
+            status.textContent = 'Privacy mode unavailable';
+            status.className = 'text-xs text-red-400 mt-2';
+        }
+        
+        enableCameraControls(false);
+        return false;
+    }
+}
+
+function enableCameraControls(enabled) {
+    // Enable/disable camera control elements
+    const privacyToggle = document.getElementById('privacy-toggle');
+    const presetDropdown = document.getElementById('preset-dropdown');
+    const goToPresetBtn = document.getElementById('go-to-preset-btn');
+    
+    [privacyToggle, presetDropdown].forEach(element => {
+        if (element) {
+            element.disabled = !enabled;
+            if (enabled) {
+                element.classList.remove('opacity-50', 'cursor-not-allowed');
+            } else {
+                element.classList.add('opacity-50', 'cursor-not-allowed');
+            }
+        }
+    });
+    
+    // Handle the go to preset button separately
+    if (goToPresetBtn) {
+        if (!enabled) {
+            goToPresetBtn.disabled = true;
+            goToPresetBtn.classList.add('opacity-50', 'cursor-not-allowed');
+        } else {
+            // Only enable if a preset is selected
+            handlePresetSelection();
+        }
+    }
+}
+
+// Use the global notification system if available
+function showCameraNotification(message, type = 'info') {
+    // Check if the global showNotification function exists
+    if (typeof window.showNotification === 'function') {
+        window.showNotification(message, type);
+    } else {
+        // Fallback to console log if global function not available
+        console.log(`[Camera] ${type.toUpperCase()}: ${message}`);
+    }
+}
+
+// Global flag to prevent double initialization
+let cameraControlsInitialized = false;
+
+// Multiple initialization approaches to ensure camera controls always load
+function initializeCameraControlsWrapper() {
+    if (cameraControlsInitialized) {
+        return;
+    }
+    
+    // Check if required DOM elements exist
+    const requiredElements = [
+        'camera-model',
+        'camera-status', 
+        'privacy-toggle',
+        'privacy-status',
+        'preset-dropdown'
+    ];
+    
+    const allElementsExist = requiredElements.every(id => document.getElementById(id) !== null);
+    
+    if (allElementsExist) {
+        cameraControlsInitialized = true;
+        console.log('🎥 Initializing camera controls...');
+        
+        // Initialize camera controls immediately
+        initializeCameraControls();
+        
+        // Set up periodic status updates
+        setInterval(refreshCameraInfo, 30000); // Check every 30 seconds
+        
+        console.log('✅ Camera controls initialized successfully');
+    } else {
+        console.log('⏳ Camera control elements not ready yet, retrying...');
+        // Retry after a short delay if elements aren't ready
+        setTimeout(initializeCameraControlsWrapper, 100);
+    }
+}
+
+// Initialize camera controls when page loads
+document.addEventListener('DOMContentLoaded', initializeCameraControlsWrapper);
+
+// Also try initialization when window loads (fallback)
+window.addEventListener('load', initializeCameraControlsWrapper);
+
+// Make the function globally available for manual calls
+window.initializeCameraControls = initializeCameraControls;
+window.initializeCameraControlsWrapper = initializeCameraControlsWrapper;
+window.refreshCameraInfo = refreshCameraInfo;
+window.refreshPresets = refreshPresets;
+
+// Debug function for manual testing
+window.debugCameraControls = function() {
+    console.log('🔧 Camera Controls Debug Info:');
+    console.log('- Initialized:', cameraControlsInitialized);
+    
+    const toggle = document.getElementById('privacy-toggle');
+    const status = document.getElementById('privacy-status');
+    const model = document.getElementById('camera-model');
+    const cameraStatus = document.getElementById('camera-status');
+    
+    console.log('- Privacy Toggle:', toggle ? `exists, checked=${toggle.checked}` : 'NOT FOUND');
+    console.log('- Privacy Status:', status ? `exists, text="${status.textContent}"` : 'NOT FOUND');
+    console.log('- Camera Model:', model ? `exists, text="${model.textContent}"` : 'NOT FOUND');
+    console.log('- Camera Status:', cameraStatus ? `exists, text="${cameraStatus.textContent}"` : 'NOT FOUND');
+    
+    // Force a refresh
+    console.log('🔄 Forcing camera info refresh...');
+    refreshCameraInfo();
+};
+
+async function initializeCameraControls() {
+    try {
+        console.log('🚀 Starting camera controls initialization...');
+        
+        // Show loading state
+        showCameraLoading(true);
+        
+        // Load camera info and presets in parallel with detailed logging
+        console.log('📡 Fetching camera info and presets...');
+        const [infoResult, presetsResult] = await Promise.allSettled([
+            refreshCameraInfo(),
+            refreshPresets()
+        ]);
+        
+        // Hide loading state
+        showCameraLoading(false);
+        
+        // Log results
+        if (infoResult.status === 'fulfilled') {
+            console.log('✅ Camera info loaded successfully:', infoResult.value);
+        } else {
+            console.error('❌ Camera info loading failed:', infoResult.reason);
+        }
+        
+        if (presetsResult.status === 'fulfilled') {
+            console.log('✅ Camera presets loaded successfully:', presetsResult.value);
+        } else {
+            console.error('❌ Camera presets loading failed:', presetsResult.reason);
+        }
+        
+        // Check if both operations completed successfully
+        const infoSuccess = infoResult.status === 'fulfilled' && infoResult.value;
+        const presetsSuccess = presetsResult.status === 'fulfilled' && presetsResult.value;
+        
+        if (!infoSuccess && !presetsSuccess) {
+            console.error('❌ Both camera info and presets failed to load');
+            showCameraNotification('Failed to initialize camera controls', 'error');
+        } else if (!infoSuccess) {
+            console.warn('⚠️ Camera info failed to load, but presets loaded');
+            showCameraNotification('Camera status unavailable', 'warning');
+        } else if (!presetsSuccess) {
+            console.warn('⚠️ Camera presets failed to load, but info loaded');
+            showCameraNotification('Camera presets unavailable', 'warning');
+        } else {
+            console.log('🎉 Camera controls initialized successfully!');
+            showCameraNotification('Camera controls ready', 'success');
+        }
+        
+        // Force a privacy mode status refresh after a short delay to ensure it's displayed
+        setTimeout(() => {
+            console.log('🔄 Final privacy mode status check...');
+            const toggle = document.getElementById('privacy-toggle');
+            const status = document.getElementById('privacy-status');
+            if (toggle && status) {
+                console.log(`🔒 Final privacy state: toggle=${toggle.checked}, status="${status.textContent}"`);
+                
+                // If status is still "Loading..." or empty, force another refresh
+                if (status.textContent.includes('Loading') || status.textContent.trim() === '') {
+                    console.log('🔄 Privacy status still loading, forcing refresh...');
+                    refreshCameraInfo();
+                }
+            }
+        }, 500);
+        
+        // Set up a fallback check that runs every 3 seconds for the first 15 seconds
+        // to ensure privacy mode status is properly displayed
+        let fallbackAttempts = 0;
+        const maxFallbackAttempts = 5;
+        
+        const fallbackInterval = setInterval(() => {
+            fallbackAttempts++;
+            const status = document.getElementById('privacy-status');
+            
+            if (status && (status.textContent.includes('Loading') || status.textContent.trim() === '')) {
+                console.log(`🔄 Fallback privacy status check ${fallbackAttempts}/${maxFallbackAttempts}...`);
+                refreshCameraInfo();
+            } else if (status && status.textContent.includes('Privacy mode')) {
+                console.log('✅ Privacy status confirmed, clearing fallback interval');
+                clearInterval(fallbackInterval);
+            }
+            
+            if (fallbackAttempts >= maxFallbackAttempts) {
+                console.log('⏰ Fallback interval expired');
+                clearInterval(fallbackInterval);
+            }
+        }, 3000);
+        
+    } catch (error) {
+        console.error('❌ Critical error initializing camera controls:', error);
+        showCameraLoading(false);
+        showCameraNotification('Camera initialization failed', 'error');
+    }
+}
+
+function showCameraLoading(show) {
+    const elements = [
+        { id: 'camera-model', defaultText: 'Loading...' },
+        { id: 'camera-status', defaultText: '<i class="fas fa-spinner fa-spin"></i> Loading...' },
+        { id: 'privacy-status', defaultText: 'Loading privacy status...' }
+    ];
+    
+    elements.forEach(({ id, defaultText }) => {
+        const element = document.getElementById(id);
+        if (element) {
+            if (show) {
+                element.innerHTML = defaultText;
+            }
+        }
+    });
+    
+    // Also handle preset dropdown
+    const presetDropdown = document.getElementById('preset-dropdown');
+    if (presetDropdown && show) {
+        presetDropdown.innerHTML = '<option value="">Loading presets...</option>';
+    }
+}
+</script>

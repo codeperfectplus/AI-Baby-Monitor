@@ -80,6 +80,13 @@ class BabyMonitorSettings:
 
     LOG_LEVEL = "INFO"
 
+    # ==================== Camera Control Settings ====================
+    # Tapo Camera Configuration
+    CAMERA_HOST = os.getenv("CAMERA_HOST", "192.168.1.100")  # Camera IP address
+    CAMERA_USERNAME = os.getenv("CAMERA_USERNAME")
+    CAMERA_PASSWORD = os.getenv("CAMERA_PASSWORD")
+    CAMERA_ENABLED = os.getenv("CAMERA_ENABLED", "false").lower() == "true"
+
 
 # Create global config instance
 config = BabyMonitorSettings()

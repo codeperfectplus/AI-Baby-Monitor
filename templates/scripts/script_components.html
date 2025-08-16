@@ -319,8 +319,8 @@
             }
         });
 
-        // Show notification function
-        function showNotification(message, type) {
+        // Show notification function (make it globally available)
+        window.showNotification = function(message, type) {
             const notification = document.createElement('div');
             notification.className = `fixed top-28 right-6 glass-card rounded-lg p-4 z-50 transform translate-x-full transition-transform duration-300`;
 
@@ -356,7 +356,7 @@
                 notification.style.transform = 'translateX(100%)';
                 setTimeout(() => notification.remove(), 300);
             }, 3000);
-        }
+        };
 
         // Add some interactive feedback
         document.querySelectorAll('.control-btn, .neon-button').forEach(btn => {
@@ -566,6 +566,13 @@
             setTimeout(() => {
                 requestChildStatus();
             }, 1000);
+
+            // Initialize camera controls if available
+            if (typeof initializeCameraControls === 'function') {
+                setTimeout(() => {
+                    initializeCameraControls();
+                }, 500);
+            }
         });
 
         // Periodically update child status
@@ -843,9 +850,17 @@
         styleSheet.textContent = notificationBadgeStyles;
         document.head.appendChild(styleSheet);
 
-        // Initialize notification badge on page load
+        // Initialize notification badge on page load (delayed to allow camera controls to init first)
         document.addEventListener('DOMContentLoaded', function () {
-            loadNotificationsList();
+            setTimeout(() => {
+                loadNotificationsList();
+                
+                // Also try to initialize camera controls if they haven't been initialized yet
+                if (typeof window.initializeCameraControlsWrapper === 'function') {
+                    console.log('🔧 Ensuring camera controls are initialized from main script...');
+                    window.initializeCameraControlsWrapper();
+                }
+            }, 200);
         });
 
         // Enhanced error handling for WebSocket events

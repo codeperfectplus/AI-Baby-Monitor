@@ -11,6 +11,7 @@ from api.monitor_route import monitor_bp
 from api.notification_route import notification_bp
 from api.error_handlers import errors_bp
 from api.websocket_handlers import register_socketio_events
+from api.camera_api import camera_info_bp, camera_control_bp
 from services.streaming.streaming_service import initialize_streaming_service
 
 app = Flask(__name__)
@@ -44,6 +45,8 @@ app.register_blueprint(metrics_bp)
 app.register_blueprint(monitor_bp)
 app.register_blueprint(notification_bp)
 app.register_blueprint(errors_bp)
+app.register_blueprint(camera_info_bp)
+app.register_blueprint(camera_control_bp)
 
 # Import and register active users blueprint
 from api.active_users_route import active_users_bp
