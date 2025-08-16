@@ -15,15 +15,20 @@ logger = logging.getLogger(__name__)
 # ==================== READ-ONLY CAMERA INFORMATION ROUTES ====================
 @camera_info_bp.route('/api/camera/info', methods=['GET'])
 def get_camera_info():
-    """Get camera basic information and connection status."""
+    """Get camera basic information, connection status, and presets."""
     try:
+        # Get camera status
         status = camera_service.get_status()
+        
+        # Get camera presets
+        presets = camera_service.get_presets()
         
         return jsonify({
             'success': status['available'],
             'device_model': status['device_model'],
             'privacy_mode': status['privacy_mode'],
             'connection_status': status['connection_status'],
+            'presets': presets,
             'error': status.get('error') if not status['available'] else None
         })
     except Exception as e:
@@ -33,22 +38,6 @@ def get_camera_info():
             'device_model': 'Error',
             'privacy_mode': False,
             'connection_status': 'error',
-            'error': str(e)
-        }), 500
-
-@camera_info_bp.route('/api/camera/presets', methods=['GET'])
-def get_camera_presets():
-    """Get list of available camera presets."""
-    try:
-        presets = camera_service.get_presets()
-        return jsonify({
-            'success': True,
-            'presets': presets
-        })
-    except Exception as e:
-        logger.error(f"Error getting camera presets: {e}")
-        return jsonify({
-            'success': False,
             'presets': [],
             'error': str(e)
         }), 500

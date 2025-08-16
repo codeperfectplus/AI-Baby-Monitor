@@ -1,102 +1,470 @@
 <!-- Camera Controls -->
-<div class="glass-card rounded-2xl p-6 hover-lift" data-aos="fade-left" data-aos-delay="200">
-    <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
-        <i class="fas fa-video text-cyan-400"></i>
-        Camera Controls
-    </h3>
+<div class="camera-controls-container" data-aos="fade-left" data-aos-delay="200">
+    <div class="section-header">
+        <div class="header-icon">
+            <i class="fas fa-video"></i>
+        </div>
+        <h3 class="section-title">Camera Controls</h3>
+        <div class="status-indicator">
+            <div class="pulse-dot"></div>
+        </div>
+    </div>
     
     <!-- Camera Basic Info -->
-    <div class="mb-6">
-        <h4 class="text-lg font-semibold mb-3 text-gray-200">Device Info</h4>
-        <div class="space-y-2 text-sm">
-            <div class="flex justify-between">
-                <span class="text-gray-400">Model:</span>
-                <span class="text-white" id="camera-model">Loading...</span>
+    <div class="info-section">
+        <h4 class="subsection-title">
+            <i class="fas fa-info-circle"></i>
+            Device Info
+        </h4>
+        <div class="info-grid">
+            <div class="info-item">
+                <span class="info-label">Model:</span>
+                <span class="info-value" id="camera-model">Loading...</span>
             </div>
-            <div class="flex justify-between">
-                <span class="text-gray-400">Status:</span>
-                <span class="text-green-400" id="camera-status">
-                    <i class="fas fa-circle text-xs"></i> Online
+            <div class="info-item">
+                <span class="info-label">Status:</span>
+                <span class="status-online" id="camera-status">
+                    <div class="status-dot"></div>
+                    Online
                 </span>
             </div>
         </div>
     </div>
 
     <!-- Privacy Mode Control -->
-    <div class="mb-6">
-        <h4 class="text-lg font-semibold mb-3 text-gray-200">Privacy Mode</h4>
-        <div class="flex items-center justify-between">
-            <span class="text-gray-300">Privacy Shield</span>
-            <label class="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" id="privacy-toggle" class="sr-only peer" onchange="togglePrivacyMode()">
-                <div class="w-11 h-6 bg-gray-600 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-cyan-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-cyan-500"></div>
+    <div class="privacy-section">
+        <h4 class="subsection-title">
+            <i class="fas fa-shield-alt"></i>
+            Privacy Mode
+        </h4>
+        <div class="privacy-control">
+            <div class="privacy-info">
+                <span class="privacy-label">Privacy Shield</span>
+                <div class="privacy-description" id="privacy-status">Privacy mode disabled</div>
+            </div>
+            <label class="modern-toggle">
+                <input type="checkbox" id="privacy-toggle" onchange="togglePrivacyMode()">
+                <div class="toggle-slider">
+                    <div class="toggle-thumb"></div>
+                </div>
             </label>
         </div>
-        <p class="text-xs text-gray-400 mt-2" id="privacy-status">Privacy mode disabled</p>
     </div>
 
     <!-- Preset Positions -->
-    <div class="mb-4">
-        <h4 class="text-lg font-semibold mb-3 text-gray-200 flex items-center justify-between">
-            Preset Positions
-            <button onclick="refreshPresets()" class="text-xs bg-gray-700 hover:bg-gray-600 px-2 py-1 rounded">
+    <div class="preset-section">
+        <div class="preset-header">
+            <h4 class="subsection-title">
+                <i class="fas fa-map-marker-alt"></i>
+                Preset Positions
+            </h4>
+            <!-- <button onclick="refreshPresets()" class="refresh-btn">
                 <i class="fas fa-sync-alt"></i>
-            </button>
-        </h4>
-        <div class="mb-3">
-            <select id="preset-dropdown" onchange="handlePresetSelection()" class="w-full bg-gray-700 border border-gray-600 text-white rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-cyan-500 focus:ring-1 focus:ring-cyan-500">
-                <option value="">Select a preset position...</option>
-            </select>
+            </button> -->
         </div>
-        <button onclick="goToSelectedPreset()" class="w-full bg-gradient-to-r from-cyan-500 to-cyan-600 hover:from-cyan-600 hover:to-cyan-700 px-3 py-2 rounded-lg text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-2" id="go-to-preset-btn" disabled>
-            <i class="fas fa-map-marker-alt text-xs"></i>
-            Go to Position
-        </button>
+        
+        <div class="preset-controls">
+            <div class="select-wrapper">
+                <select id="preset-dropdown" onchange="handlePresetSelection()">
+                    <option value="">Select a preset position...</option>
+                </select>
+                <div class="select-arrow">
+                    <i class="fas fa-chevron-down"></i>
+                </div>
+            </div>
+            
+            <button onclick="goToSelectedPreset()" class="preset-action-btn" id="go-to-preset-btn" disabled>
+                <div class="btn-content">
+                    <i class="fas fa-crosshairs"></i>
+                    <span>Go to Position</span>
+                </div>
+                <div class="btn-glow"></div>
+            </button>
+        </div>
     </div>
 
     <!-- Quick Actions -->
-    <div class="flex gap-2">
-        <button onclick="refreshCameraInfo()" class="w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 px-3 py-2 rounded-lg text-white text-sm font-medium transition-all duration-200 flex items-center justify-center gap-1">
-            <i class="fas fa-sync-alt text-xs"></i>
-            Refresh Status
+    <!-- <div class="actions-section">
+        <button onclick="refreshCameraInfo()" class="refresh-status-btn">
+            <div class="btn-content">
+                <i class="fas fa-sync-alt"></i>
+                <span>Refresh Status</span>
+            </div>
+            <div class="btn-shine"></div>
         </button>
-    </div>
+    </div> -->
 </div>
 
 <style>
-.preset-item {
-    background: rgba(255, 255, 255, 0.05);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    transition: all 0.2s ease;
+.camera-controls-container {
+    background: linear-gradient(135deg, rgba(17, 24, 39, 0.8) 0%, rgba(31, 41, 55, 0.9) 100%);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(139, 92, 246, 0.3);
+    border-radius: 24px;
+    padding: 28px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 
+        0 25px 50px -12px rgba(0, 0, 0, 0.6),
+        0 0 0 1px rgba(139, 92, 246, 0.1),
+        inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.preset-item:hover {
-    background: rgba(0, 245, 255, 0.1);
-    border-color: rgba(0, 245, 255, 0.3);
+.camera-controls-container::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, rgba(139, 92, 246, 0.8), transparent);
 }
 
-.preset-item.active {
-    background: rgba(0, 245, 255, 0.2);
-    border-color: rgba(0, 245, 255, 0.5);
+.camera-controls-container:hover {
+    border-color: rgba(139, 92, 246, 0.5);
+    box-shadow: 
+        0 32px 64px -12px rgba(0, 0, 0, 0.7),
+        0 0 32px rgba(139, 92, 246, 0.15),
+        inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
 }
 
-#preset-dropdown {
-    transition: all 0.2s ease;
+.section-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 28px;
+    position: relative;
 }
 
-#preset-dropdown:focus {
-    box-shadow: 0 0 10px rgba(0, 245, 255, 0.3);
+.header-icon {
+    width: 40px;
+    height: 40px;
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    color: white;
+    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.4);
 }
 
-#preset-dropdown:disabled {
-    opacity: 0.5;
+.section-title {
+    font-size: 20px;
+    font-weight: 700;
+    color: white;
+    margin: 0;
+    flex: 1;
+}
+
+.status-indicator {
+    position: relative;
+}
+
+.pulse-dot {
+    width: 8px;
+    height: 8px;
+    background: #10b981;
+    border-radius: 50%;
+    animation: pulse 2s infinite;
+    box-shadow: 0 0 10px rgba(16, 185, 129, 0.8);
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.2); }
+}
+
+.info-section, .privacy-section, .preset-section, .actions-section {
+    margin-bottom: 24px;
+}
+
+.info-section:last-child, .privacy-section:last-child, .preset-section:last-child, .actions-section:last-child {
+    margin-bottom: 0;
+}
+
+.subsection-title {
+    font-size: 16px;
+    font-weight: 600;
+    color: #e5e7eb;
+    margin: 0 0 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.subsection-title i {
+    color: #8b5cf6;
+    font-size: 14px;
+}
+
+.info-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px 16px;
+    background: rgba(55, 65, 81, 0.6);
+    border: 1px solid rgba(75, 85, 99, 0.4);
+    border-radius: 12px;
+    backdrop-filter: blur(8px);
+}
+
+.info-label {
+    color: #9ca3af;
+    font-size: 14px;
+}
+
+.info-value {
+    color: white;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.status-online {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: #10b981;
+    font-weight: 500;
+    font-size: 14px;
+}
+
+.status-dot {
+    width: 6px;
+    height: 6px;
+    background: #10b981;
+    border-radius: 50%;
+    box-shadow: 0 0 6px rgba(16, 185, 129, 0.8);
+}
+
+.privacy-control {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px;
+    background: rgba(55, 65, 81, 0.6);
+    border: 1px solid rgba(75, 85, 99, 0.4);
+    border-radius: 16px;
+    backdrop-filter: blur(8px);
+}
+
+.privacy-info {
+    flex: 1;
+}
+
+.privacy-label {
+    color: #e5e7eb;
+    font-weight: 500;
+    font-size: 15px;
+    display: block;
+}
+
+.privacy-description {
+    color: #9ca3af;
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+.modern-toggle {
+    position: relative;
+    cursor: pointer;
+}
+
+.modern-toggle input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.toggle-slider {
+    width: 52px;
+    height: 28px;
+    background: rgba(75, 85, 99, 0.8);
+    border: 1px solid rgba(107, 114, 128, 0.6);
+    border-radius: 14px;
+    position: relative;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.toggle-thumb {
+    width: 20px;
+    height: 20px;
+    background: white;
+    border-radius: 10px;
+    position: absolute;
+    top: 3px;
+    left: 4px;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+}
+
+.modern-toggle input:checked + .toggle-slider {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    border-color: #06b6d4;
+    box-shadow: 0 0 20px rgba(6, 182, 212, 0.4);
+}
+
+.modern-toggle input:checked + .toggle-slider .toggle-thumb {
+    transform: translateX(24px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.preset-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+}
+
+.refresh-btn {
+    width: 32px;
+    height: 32px;
+    background: rgba(75, 85, 99, 0.8);
+    border: 1px solid rgba(107, 114, 128, 0.4);
+    border-radius: 8px;
+    color: #9ca3af;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.3s ease;
+    font-size: 12px;
+}
+
+.refresh-btn:hover {
+    background: rgba(107, 114, 128, 0.8);
+    color: #06b6d4;
+    border-color: rgba(6, 182, 212, 0.4);
+    transform: rotate(180deg);
+}
+
+.preset-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.select-wrapper {
+    position: relative;
+}
+
+.select-wrapper select {
+    width: 100%;
+    background: rgba(55, 65, 81, 0.8);
+    border: 1px solid rgba(75, 85, 99, 0.6);
+    color: white;
+    border-radius: 12px;
+    padding: 14px 16px;
+    font-size: 14px;
+    appearance: none;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    padding-right: 40px;
+}
+
+.select-wrapper select:focus {
+    outline: none;
+    border-color: #06b6d4;
+    box-shadow: 0 0 0 3px rgba(6, 182, 212, 0.1), 0 0 20px rgba(6, 182, 212, 0.2);
+}
+
+.select-arrow {
+    position: absolute;
+    right: 12px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #9ca3af;
+    pointer-events: none;
+    font-size: 12px;
+}
+
+.preset-action-btn, .refresh-status-btn {
+    width: 100%;
+    background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+    border: none;
+    border-radius: 12px;
+    padding: 14px 20px;
+    color: white;
+    font-weight: 600;
+    font-size: 14px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 0 8px 25px rgba(6, 182, 212, 0.3);
+}
+
+.preset-action-btn:hover:not(:disabled), .refresh-status-btn:hover {
+    background: linear-gradient(135deg, #0891b2 0%, #0e7490 100%);
+    box-shadow: 0 12px 35px rgba(6, 182, 212, 0.4);
+    transform: translateY(-2px);
+}
+
+.preset-action-btn:disabled {
+    background: linear-gradient(135deg, #374151 0%, #4b5563 100%);
     cursor: not-allowed;
+    box-shadow: none;
+    opacity: 0.6;
 }
 
-#go-to-preset-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-    background: linear-gradient(135deg, #6b7280 0%, #4b5563 100%);
+.btn-content {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    position: relative;
+    z-index: 2;
+}
+
+.btn-glow, .btn-shine {
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+    transition: left 0.5s;
+}
+
+.preset-action-btn:hover:not(:disabled) .btn-glow,
+.refresh-status-btn:hover .btn-shine {
+    left: 100%;
+}
+
+.refresh-status-btn {
+    background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+    box-shadow: 0 8px 25px rgba(59, 130, 246, 0.3);
+}
+
+.refresh-status-btn:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+    box-shadow: 0 12px 35px rgba(59, 130, 246, 0.4);
+}
+
+/* Responsive Design */
+@media (max-width: 480px) {
+    .camera-controls-container {
+        padding: 20px;
+        border-radius: 20px;
+    }
+    
+    .section-title {
+        font-size: 18px;
+    }
+    
+    .header-icon {
+        width: 36px;
+        height: 36px;
+        font-size: 16px;
+    }
 }
 </style>
 
@@ -174,57 +542,9 @@ function goToSelectedPreset() {
     }
 }
 
-async function refreshPresets() {
-    try {
-        const response = await fetch('/api/camera/presets');
-        
-        if (!response.ok) {
-            throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-        }
-        
-        const data = await response.json();
-        const dropdown = document.getElementById('preset-dropdown');
-        
-        if (!dropdown) return false;
-        
-        // Clear existing options except the first one
-        dropdown.innerHTML = '<option value="">Select a preset position...</option>';
-        
-        if (data.success && data.presets && data.presets.length > 0) {
-            data.presets.forEach(preset => {
-                const option = document.createElement('option');
-                option.value = preset.id;
-                option.textContent = preset.name || `Preset ${preset.id}`;
-                dropdown.appendChild(option);
-            });
-        } else {
-            // Add a message when no presets are available
-            const option = document.createElement('option');
-            option.value = '';
-            option.textContent = 'No presets available';
-            option.disabled = true;
-            dropdown.appendChild(option);
-        }
-        
-        // Reset the go button state
-        handlePresetSelection();
-        return true;
-        
-    } catch (error) {
-        console.error('Error loading presets:', error);
-        
-        const dropdown = document.getElementById('preset-dropdown');
-        if (dropdown) {
-            dropdown.innerHTML = '<option value="">Failed to load presets</option>';
-        }
-        
-        return false;
-    }
-}
-
 async function refreshCameraInfo() {
     try {
-        console.log('🔄 Refreshing camera info...');
+        console.log('🔄 Refreshing camera info and presets...');
         const response = await fetch('/api/camera/info');
         
         if (!response.ok) {
@@ -278,6 +598,34 @@ async function refreshCameraInfo() {
             console.error('❌ Privacy mode elements not found!');
         }
         
+        // Update presets dropdown
+        const dropdown = document.getElementById('preset-dropdown');
+        if (dropdown) {
+            // Clear existing options except the first one
+            dropdown.innerHTML = '<option value="">Select a preset position...</option>';
+            
+            if (data.presets && data.presets.length > 0) {
+                data.presets.forEach(preset => {
+                    const option = document.createElement('option');
+                    option.value = preset.id;
+                    option.textContent = preset.name || `Preset ${preset.id}`;
+                    dropdown.appendChild(option);
+                });
+                console.log(`✅ Loaded ${data.presets.length} presets`);
+            } else {
+                // Add a message when no presets are available
+                const option = document.createElement('option');
+                option.value = '';
+                option.textContent = 'No presets available';
+                option.disabled = true;
+                dropdown.appendChild(option);
+                console.log('⚠️ No presets available');
+            }
+            
+            // Reset the go button state
+            handlePresetSelection();
+        }
+        
         // Enable/disable controls based on camera availability
         enableCameraControls(data.success);
         
@@ -286,7 +634,7 @@ async function refreshCameraInfo() {
             showCameraNotification('Camera control is disabled. Enable in .env settings.', 'info');
         }
         
-        console.log('✅ Camera info refresh complete');
+        console.log('✅ Camera info and presets refresh complete');
         return data.success;
         
     } catch (error) {
@@ -295,6 +643,7 @@ async function refreshCameraInfo() {
         // Update UI for error state
         const modelElement = document.getElementById('camera-model');
         const statusElement = document.getElementById('camera-status');
+        const dropdown = document.getElementById('preset-dropdown');
         
         if (modelElement) modelElement.textContent = 'Error';
         if (statusElement) {
@@ -309,6 +658,11 @@ async function refreshCameraInfo() {
             toggle.checked = false;
             status.textContent = 'Privacy mode unavailable';
             status.className = 'text-xs text-red-400 mt-2';
+        }
+        
+        // Set presets to error state
+        if (dropdown) {
+            dropdown.innerHTML = '<option value="">Failed to load presets</option>';
         }
         
         enableCameraControls(false);
@@ -404,7 +758,6 @@ window.addEventListener('load', initializeCameraControlsWrapper);
 window.initializeCameraControls = initializeCameraControls;
 window.initializeCameraControlsWrapper = initializeCameraControlsWrapper;
 window.refreshCameraInfo = refreshCameraInfo;
-window.refreshPresets = refreshPresets;
 
 // Debug function for manual testing
 window.debugCameraControls = function() {
@@ -433,45 +786,20 @@ async function initializeCameraControls() {
         // Show loading state
         showCameraLoading(true);
         
-        // Load camera info and presets in parallel with detailed logging
+        // Load camera info and presets in one call
         console.log('📡 Fetching camera info and presets...');
-        const [infoResult, presetsResult] = await Promise.allSettled([
-            refreshCameraInfo(),
-            refreshPresets()
-        ]);
+        const infoResult = await refreshCameraInfo();
         
         // Hide loading state
         showCameraLoading(false);
         
         // Log results
-        if (infoResult.status === 'fulfilled') {
-            console.log('✅ Camera info loaded successfully:', infoResult.value);
-        } else {
-            console.error('❌ Camera info loading failed:', infoResult.reason);
-        }
-        
-        if (presetsResult.status === 'fulfilled') {
-            console.log('✅ Camera presets loaded successfully:', presetsResult.value);
-        } else {
-            console.error('❌ Camera presets loading failed:', presetsResult.reason);
-        }
-        
-        // Check if both operations completed successfully
-        const infoSuccess = infoResult.status === 'fulfilled' && infoResult.value;
-        const presetsSuccess = presetsResult.status === 'fulfilled' && presetsResult.value;
-        
-        if (!infoSuccess && !presetsSuccess) {
-            console.error('❌ Both camera info and presets failed to load');
-            showCameraNotification('Failed to initialize camera controls', 'error');
-        } else if (!infoSuccess) {
-            console.warn('⚠️ Camera info failed to load, but presets loaded');
-            showCameraNotification('Camera status unavailable', 'warning');
-        } else if (!presetsSuccess) {
-            console.warn('⚠️ Camera presets failed to load, but info loaded');
-            showCameraNotification('Camera presets unavailable', 'warning');
-        } else {
-            console.log('🎉 Camera controls initialized successfully!');
+        if (infoResult) {
+            console.log('✅ Camera info and presets loaded successfully');
             showCameraNotification('Camera controls ready', 'success');
+        } else {
+            console.error('❌ Camera info and presets loading failed');
+            showCameraNotification('Failed to initialize camera controls', 'error');
         }
         
         // Force a privacy mode status refresh after a short delay to ensure it's displayed
