@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
@@ -247,6 +248,61 @@
                 transform: translateY(0);
             }
         }
+        /* Particles.js container (similar to index.html) */
+        #particles-js {
+            position: fixed;
+            inset: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: -2; /* behind gradient + custom particles */
+            pointer-events: none;
+            opacity: 0.85;
+            filter: blur(0.5px) brightness(1.1);
+            transition: opacity 0.5s;
+        }
+        /* Soft glow overlay for dreamy effect */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background:
+            radial-gradient(circle at 60% 40%, rgba(124,58,237,0.10) 0%, transparent 60%),
+            radial-gradient(circle at 30% 80%, rgba(0,245,255,0.08) 0%, transparent 70%),
+            linear-gradient(135deg, rgba(255,255,255,0.03) 0%, transparent 100%);
+            pointer-events: none;
+            z-index: -1;
+            mix-blend-mode: lighten;
+        }
+        /* Add a subtle vignette for focus */
+        .vignette {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+            z-index: -1;
+            background: radial-gradient(ellipse at center, transparent 70%, rgba(30,27,58,0.7) 100%);
+        }
+        /* Animated twinkle effect for particles */
+        @keyframes twinkle {
+            0%, 100% { opacity: 0.7; }
+            50% { opacity: 1; }
+        }
+        .floating-particle, .baby-particle {
+            animation-name: floatParticle, twinkle;
+            animation-duration: 8s, 2s;
+            animation-iteration-count: infinite, infinite;
+            animation-timing-function: linear, ease-in-out;
+        }
+        /* Add a few star shapes for baby theme */
+        .star-particle {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            color: #fffbe6;
+            font-size: 10px;
+            opacity: 0.8;
+            animation: floatParticle 12s infinite linear, twinkle 2.5s infinite;
+            pointer-events: none;
+        }
     </style>
     <script>
         // Get current time for greeting
@@ -311,6 +367,8 @@
     </script>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
+    <!-- Particles.js dynamic background -->
+    <div id="particles-js"></div>
     <!-- Floating particles background -->
     <div class="fixed inset-0 pointer-events-none">
         <div class="floating-particle" style="left: 10%; animation-delay: 0s;"></div>
@@ -466,6 +524,24 @@
                     this.parentElement.classList.remove('animate__animated', 'animate__pulse');
                 });
             });
+        });
+        // Particles.js initialization (mirrors index.html styling)
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 50, density: { enable: true, value_area: 800 } },
+                color: { value: ['#00f5ff', '#7c3aed', '#10b981'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.3, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
+                size: { value: 3, random: true, anim: { enable: true, speed: 2, size_min: 0.1, sync: false } },
+                line_linked: { enable: true, distance: 150, color: '#00f5ff', opacity: 0.2, width: 1 },
+                move: { enable: true, speed: 1, direction: 'none', random: true, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+                modes: { repulse: { distance: 200, duration: 0.4 }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
         });
     </script>
 </body>

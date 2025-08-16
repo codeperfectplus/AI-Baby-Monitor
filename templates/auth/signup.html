@@ -8,6 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/particles.js/2.0.0/particles.min.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
         
@@ -260,6 +261,23 @@
             transition: all 0.3s ease;
             background: linear-gradient(90deg, #ef4444, #f59e0b, #10b981);
         }
+         /* Particles.js container (similar to index.html) */
+        #particles-js {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -2; /* behind gradient + custom particles */
+        }
+        /* Optional overlay to gently blend particles */
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(0,245,255,0.05), transparent 60%);
+            pointer-events: none;
+            z-index: -1;
+        }
     </style>
     <script>
         // Get current time for greeting
@@ -344,6 +362,7 @@
     </script>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4">
+    <div id="particles-js"></div>
     <!-- Floating particles background -->
     <div class="fixed inset-0 pointer-events-none">
         <div class="floating-particle" style="left: 10%; animation-delay: 0s;"></div>
@@ -559,6 +578,23 @@
                     this.parentElement.classList.remove('animate__animated', 'animate__pulse');
                 });
             });
+        });
+        particlesJS('particles-js', {
+            particles: {
+                number: { value: 50, density: { enable: true, value_area: 800 } },
+                color: { value: ['#00f5ff', '#7c3aed', '#10b981'] },
+                shape: { type: 'circle' },
+                opacity: { value: 0.3, random: true, anim: { enable: true, speed: 1, opacity_min: 0.1, sync: false } },
+                size: { value: 3, random: true, anim: { enable: true, speed: 2, size_min: 0.1, sync: false } },
+                line_linked: { enable: true, distance: 150, color: '#00f5ff', opacity: 0.2, width: 1 },
+                move: { enable: true, speed: 1, direction: 'none', random: true, straight: false, out_mode: 'out', bounce: false }
+            },
+            interactivity: {
+                detect_on: 'canvas',
+                events: { onhover: { enable: true, mode: 'repulse' }, onclick: { enable: true, mode: 'push' }, resize: true },
+                modes: { repulse: { distance: 200, duration: 0.4 }, push: { particles_nb: 4 } }
+            },
+            retina_detect: true
         });
     </script>
 </body>
