@@ -2012,23 +2012,6 @@
     </script>
 
     <script>
-        function clearAllNotifications() {
-            fetch('/notifications/clear', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        loadNotificationsList(); // Refresh the list
-                        showNotification('All notifications cleared', 'success');
-                        window.lastNotificationId = 0; // Reset tracking
-                    }
-                })
-                .catch(error => console.error('Error clearing notifications:', error));
-        }
 
         // Update the existing fetchNotifications to also update the badge
         const originalFetchNotifications = fetchNotifications;
@@ -2234,23 +2217,23 @@
         document.head.appendChild(styleSheet);
 
         // Initialize notification badge on page load
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             loadNotificationsList();
         });
 
         // Enhanced error handling for WebSocket events
-        socket.on('error', function(error) {
+        socket.on('error', function (error) {
             console.error('WebSocket error:', error);
             showNotification('Connection error occurred', 'error');
         });
 
-        socket.on('reconnect', function() {
+        socket.on('reconnect', function () {
             showNotification('Reconnected to server', 'success');
             checkStreamingPermissions();
             requestChildStatus();
         });
 
-        socket.on('reconnect_error', function() {
+        socket.on('reconnect_error', function () {
             showNotification('Failed to reconnect to server', 'error');
         });
 
@@ -2268,9 +2251,9 @@
             if (performanceStats.fpsHistory.length > 10) {
                 performanceStats.fpsHistory.shift();
             }
-            
+
             performanceStats.avgFps = performanceStats.fpsHistory.reduce((a, b) => a + b, 0) / performanceStats.fpsHistory.length;
-            
+
             // Detect frame drops
             if (fps < performanceStats.avgFps * 0.7) {
                 performanceStats.frameDrops++;
@@ -2295,16 +2278,16 @@
         setInterval(autoAdjustQuality, 30000);
 
         // Enhanced video stream error handling
-        videoStream.addEventListener('error', function(e) {
+        videoStream.addEventListener('error', function (e) {
             console.error('Video stream error:', e);
             showNotification('Video stream error occurred', 'error');
         });
 
-        videoStream.addEventListener('loadstart', function() {
+        videoStream.addEventListener('loadstart', function () {
             console.log('Video stream loading started');
         });
 
-        videoStream.addEventListener('loadeddata', function() {
+        videoStream.addEventListener('loadeddata', function () {
             console.log('Video stream data loaded');
         });
 

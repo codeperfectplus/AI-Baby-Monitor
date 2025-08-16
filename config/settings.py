@@ -34,6 +34,9 @@ class BabyMonitorSettings:
     CONFIDENCE_THRESHOLD = 0.4  # detection confidence
     TARGET_FPS = 30.0  # reduced fps for CPU processing
     DEBUG_VIDEO = True  # enable extra video debugging output
+    # GPU usage flag
+    USE_GPU = False
+    GPU_DEVICE_INDEX = int(os.getenv("GPU_DEVICE_INDEX", 0))  # which GPU to use
     
     # ==================== Logging Settings ====================
     # Use Docker-compatible paths if running in container

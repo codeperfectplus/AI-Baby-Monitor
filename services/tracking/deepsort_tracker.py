@@ -46,7 +46,7 @@ class DeepSortTracker:
         self.min_history = getattr(config, "CHILD_MIN_HISTORY", 5)
         self.height_ratio_threshold = getattr(config, "CHILD_HEIGHT_RATIO_THRESHOLD", 0.50)
         self.stability_frames = getattr(config, "CHILD_STABILITY_FRAMES", 3)
-        self.revalidation_period = getattr(config, "CHILD_REVALIDATION_FRAMES", 300)
+        self.revalidation_period = getattr(config, "CHILD_REVALIDATION_FRAMES", 30)
         self.switch_margin = getattr(config, "CHILD_SWITCH_MARGIN", 0.85)  # new candidate must be <85% of current child's avg height
 
         self.frame_count = 0
@@ -56,6 +56,14 @@ class DeepSortTracker:
         self.frame_count += 1
         tracks = self.tracker.update_tracks(detections, frame=frame)
         self._update_height_statistics(tracks)
+
+        # --- NEW: if child track is lost, clear selection ---
+        if self.child_id is not None:
+            active_ids = {t.track_id for t in tracks if t.is_confirmed()}
+            if self.child_id not in active_ids:
+                log_line(f"Child track lost: track_id={self.child_id}, clearing selection.")
+                self.clear_child_selection()
+
         return tracks
 
     def _update_height_statistics(self, tracks):
@@ -128,9 +136,12 @@ class DeepSortTracker:
             * It has at least min_history frames of height data.
             * Its average height ratio vs global avg (or median) is below height_ratio_threshold.
         - Track must satisfy the candidate condition for stability_frames consecutive frames before locking.
-        - Fallback: if no candidate, optionally revert to original smallest bbox (current-frame) logic.
         - Periodic revalidation: every N frames, check for new, significantly smaller candidates.
         """
+        # --- NEW: Force re-check every 15 frames if no child selected ---
+        if self.child_id is None and self.frame_count % 15 == 0:
+            log_line("Periodic re-check triggered (every 15 frames).")
+
         # Periodic revalidation of child_id
         if self.child_id is not None and self.frame_count % self.revalidation_period == 0:
             self._revalidate_child_selection(tracks)
@@ -141,6 +152,7 @@ class DeepSortTracker:
         if not getattr(config, "AUTO_SELECT_SMALLEST", True):
             return
 
+        # Normal candidate evaluation
         usable_tracks = []
         for t in tracks:
             if not t.is_confirmed():
@@ -152,13 +164,32 @@ class DeepSortTracker:
                 continue
             usable_tracks.append(tid)
 
+        # --- SINGLE TRACK FALLBACK ---
+        if len(usable_tracks) == 1 and self.child_id is None:
+            only_tid = usable_tracks[0]
+            only_avg_height = self.track_avg_height[only_tid]
+
+            # safeguard: avoid mistaking a lone tall adult as child
+            abs_child_thresh = getattr(config, "ABS_CHILD_HEIGHT_THRESHOLD", 120)
+
+            if only_avg_height < abs_child_thresh:
+                self.child_id = only_tid
+                log_line(
+                    f"Child auto-selected (single track fallback). "
+                    f"track_id={self.child_id} avg_height={only_avg_height:.2f}"
+                )
+                notification_service.dispatch_notification(
+                    "Child Selected",
+                    f"Auto-selected track ID {self.child_id} (single-track fallback)"
+                )
+            return
+        # -----------------------------
+
         if not usable_tracks:
-            self._fallback_smallest_bbox(tracks, smallest_det_tlwh)
             return
 
         avg_heights = [self.track_avg_height[tid] for tid in usable_tracks]
         if not avg_heights:
-            self._fallback_smallest_bbox(tracks, smallest_det_tlwh)
             return
 
         global_avg = mean(avg_heights)
@@ -173,7 +204,6 @@ class DeepSortTracker:
                 candidates.append((tid, track_avg, ratio))
 
         if not candidates:
-            self._fallback_smallest_bbox(tracks, smallest_det_tlwh)
             return
 
         candidates.sort(key=lambda x: (x[1], x[2]))
@@ -207,26 +237,36 @@ class DeepSortTracker:
             self.child_id = None
             return
 
-        # Gather candidates
         usable_tracks = [tid for tid in self.track_avg_height
-                         if len(self.track_height_history.get(tid, [])) >= self.min_history]
-        avg_heights = [self.track_avg_height[tid] for tid in usable_tracks]
-        if not avg_heights:
+                        if len(self.track_height_history.get(tid, [])) >= self.min_history]
+
+        if not usable_tracks:
             return
+
+        avg_heights = [self.track_avg_height[tid] for tid in usable_tracks]
         ref_height = min(mean(avg_heights), median(avg_heights))
+
         for tid in usable_tracks:
             if tid == self.child_id:
                 continue
             candidate_avg = self.track_avg_height[tid]
             candidate_ratio = candidate_avg / max(ref_height, 1.0)
-            # must satisfy threshold and be switch_margin smaller than current child
+
+            # --- relaxed switching condition ---
+            # 1) candidate must satisfy height_ratio_threshold
+            # 2) candidate must be significantly smaller than current child
             if candidate_ratio < self.height_ratio_threshold and candidate_avg < self.switch_margin * current_child_avg:
                 self.child_id = tid
-                log_line(f"Child switched to new smaller candidate: track_id={self.child_id} avg_height={candidate_avg:.2f} ratio={candidate_ratio:.2f}")
+                log_line(
+                    f"Child switched to new smaller candidate: "
+                    f"track_id={self.child_id} avg_height={candidate_avg:.2f} "
+                    f"ratio={candidate_ratio:.2f}"
+                )
                 notification_service.dispatch_notification(
-                    "Child Selected", f"Switched to track ID {self.child_id} (new candidate is smaller)"
+                    "Child Selected", f"Switched to track ID {self.child_id} (new smaller candidate detected)"
                 )
                 break
+
 
     def _fallback_smallest_bbox(self, tracks, smallest_det_tlwh):
         """Original single-frame fallback: map smallest detection via IoU to a track."""
