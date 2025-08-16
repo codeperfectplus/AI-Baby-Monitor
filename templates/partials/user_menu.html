@@ -1,0 +1,35 @@
+<!-- Enhanced User Menu -->
+<div class="relative user-menu">
+    <button class="nav-link flex items-center hover-lift" onclick="toggleUserMenu()">
+        <div class="w-8 h-8 rounded-full bg-gradient-to-r from-cyan-500 to-blue-500 flex items-center justify-center text-white font-medium mr-2 shadow-lg">
+            {{ current_user.username[0].upper() }}
+        </div>
+        <div class="flex flex-col items-start">
+            <span class="font-medium">{{ current_user.username }}</span>
+            <span class="text-xs text-cyan-400">{{ current_user.relationship or 'Guardian' }}</span>
+        </div>
+        <i class="fas fa-chevron-down ml-2 text-xs transition-transform"></i>
+    </button>
+    <div id="user-dropdown" class="user-dropdown">
+        <div class="p-3 border-b border-white/10">
+            <p class="text-white font-medium">{{ current_user.username }}</p>
+            <p class="text-cyan-400 text-sm">{{ current_user.relationship or 'Guardian' }}</p>
+            <p class="text-gray-400 text-xs">{{ current_user.email }}</p>
+        </div>
+        {% if current_user.is_admin %}
+        <a href="{{ url_for('auth.user_management') }}" class="dropdown-item">
+            <i class="fas fa-users mr-3"></i>User Management
+        </a>
+        <a href="{{ url_for('auth.login_logs') }}" class="dropdown-item">
+            <i class="fas fa-history mr-3"></i>Login Logs
+        </a>
+        {% endif %}
+        <a href="{{ url_for('auth.change_password') }}" class="dropdown-item">
+            <i class="fas fa-key mr-3"></i>Change Password
+        </a>
+        <div class="border-t border-white/10"></div>
+        <a href="{{ url_for('auth.logout') }}" class="dropdown-item text-red-400 hover:text-red-300">
+            <i class="fas fa-sign-out-alt mr-3"></i>Logout
+        </a>
+    </div>
+</div>

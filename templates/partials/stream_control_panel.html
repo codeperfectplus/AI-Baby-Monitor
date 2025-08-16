@@ -1,0 +1,30 @@
+<!-- Enhanced Stream Control Panel -->
+<div class="glass-card rounded-2xl p-6 mb-6" data-aos="fade-up" data-aos-delay="200">
+    <div class="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+        <div class="flex items-center gap-4">
+            <div id="connection-status" class="flex items-center gap-2">
+                <div id="status-dot" class="w-3 h-3 bg-red-500 rounded-full animate-pulse"></div>
+                <span id="status-text" class="text-white font-medium">Connecting...</span>
+            </div>
+            <div class="text-sm text-gray-400">Protocol: <span class="text-cyan-400 font-medium">WebSocket</span></div>
+        </div>
+        <div class="flex flex-col lg:flex-row items-start lg:items-center gap-4">
+            <div class="flex items-center gap-4 text-sm text-gray-400">
+                <div>Clients: <span id="client-count" class="text-cyan-400 font-medium">0</span></div>
+                <div>FPS: <span id="current-fps" class="text-green-400 font-medium">0</span></div>
+                <div>Quality: <span id="current-quality" class="text-yellow-400 font-medium">80</span>%</div>
+            </div>
+            <div class="flex items-center gap-2">
+                <label class="text-sm text-gray-400">Quality:</label>
+                <input type="range" id="quality-slider" min="30" max="100" value="80" step="10" class="w-20 h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer">
+                <span id="quality-value" class="text-sm text-white">80%</span>
+                <button id="apply-quality" class="neon-button px-3 py-1 rounded text-xs font-medium hover-lift">Apply</button>
+            </div>
+            <div class="flex items-center gap-2">
+                <button id="pause-resume" class="control-btn px-3 py-1 rounded-full text-sm hover-lift">
+                    <i class="fas fa-pause"></i> Pause
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

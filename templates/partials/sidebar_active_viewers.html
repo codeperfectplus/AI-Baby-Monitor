@@ -1,0 +1,15 @@
+{% if current_user.is_admin %}
+<div class="glass-card rounded-2xl p-6 hover-lift" id="active-viewers-card" data-aos="fade-left" data-aos-delay="200">
+    <h3 class="text-xl font-bold mb-6 flex items-center gap-2">
+        <i class="fas fa-users text-purple-400"></i>Active Viewers
+        <span id="active-count-badge" class="ml-2 bg-purple-500 bg-opacity-20 text-purple-400 text-xs font-medium px-2 py-1 rounded-full border border-purple-400 animate-pulse">0</span>
+    </h3>
+    <div id="active-viewers-list" class="space-y-3">
+        <div class="text-center text-gray-400 text-sm py-4">
+            <div class="loading-spinner mx-auto mb-2"></div>
+            <i class="fas fa-user-clock text-2xl mb-2"></i>
+            <p>No active viewers</p>
+        </div>
+    </div>
+</div>
+{% endif %}

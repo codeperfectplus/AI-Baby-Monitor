@@ -1,0 +1,47 @@
+<!-- Enhanced Video Container -->
+<div class="video-container rounded-2xl aspect-video relative group" data-aos="zoom-in" data-aos-delay="300">
+    <div id="streaming-disabled-overlay" class="absolute inset-0 bg-gray-900 bg-opacity-95 rounded-2xl flex items-center justify-center z-20" style="display: none;">
+        <div class="text-center p-8" data-aos="fade-up">
+            <div class="text-6xl mb-4"><i class="fas fa-video-slash text-red-400"></i></div>
+            <h3 class="text-2xl font-bold text-white mb-2">Camera Offline</h3>
+            <p class="text-gray-300 mb-4">Your streaming access has been disabled by an administrator.</p>
+            <div class="bg-red-500 bg-opacity-20 border border-red-400 text-red-300 px-4 py-2 rounded-lg">
+                <i class="fas fa-exclamation-triangle mr-2"></i>Contact your administrator to restore access
+            </div>
+        </div>
+    </div>
+    <img id="video-stream" alt="Live AI Baby Monitor Stream" class="w-full h-full object-cover rounded-2xl transition-all duration-500" src="data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7" />
+    <div class="absolute top-4 right-4 flex gap-2">
+        <div id="live-status" class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2 hover-lift" style="display: none;">
+            <div id="live-indicator" class="w-2 h-2 bg-red-500 rounded-full animate-pulse"></div>
+            <span class="text-red-400 font-medium">LIVE</span>
+        </div>
+        <div id="ai-status" class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2 hover-lift" style="display: none;">
+            <i class="fas fa-robot text-cyan-400"></i>
+            <span class="text-cyan-400 font-medium">AI Active</span>
+        </div>
+        <div class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2 hover-lift">
+            <i class="fas fa-wifi text-green-400"></i>
+            <span class="text-green-400 font-medium" id="stream-fps">-- FPS</span>
+        </div>
+        <div id="sleep-status-indicator" class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2 hover-lift">
+            <i id="sleep-status-icon" class="fas fa-moon text-gray-400"></i>
+            <span id="sleep-status-text" class="text-gray-400 font-medium">--</span>
+        </div>
+    </div>
+    <div class="absolute inset-0 control-overlay rounded-2xl">
+        <div class="absolute bottom-6 left-6 flex gap-3">
+            <button class="control-btn p-3 rounded-full hover-lift" onclick="takeSnapshot()" title="Snapshot"><i class="fas fa-camera text-white"></i></button>
+            <button class="control-btn p-3 rounded-full hover-lift" onclick="toggleFullscreen()" title="Fullscreen"><i class="fas fa-expand text-white"></i></button>
+            <button id="clear-child-btn" class="control-btn p-3 rounded-full hover-lift" onclick="clearChildSelection()" title="Clear Child Selection"><i class="fas fa-times text-white"></i></button>
+        </div>
+        <div class="absolute bottom-6 right-6">
+            <div id="child-status" class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2 mb-2 hover-lift" style="display: none;">
+                <i class="fas fa-child text-green-400"></i>
+                <span class="text-green-400 font-medium">Child: <span id="child-id">--</span></span>
+            </div>
+            <div class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2 mb-2 hover-lift"><i class="fas fa-mouse-pointer text-cyan-400"></i><span class="text-cyan-400 font-medium">Click to Select Child</span></div>
+            <div class="glass-card px-3 py-1 rounded-full text-sm flex items-center gap-2 hover-lift"><i class="fas fa-keyboard text-yellow-400"></i><span class="text-yellow-400 font-medium">Press H for shortcuts</span></div>
+        </div>
+    </div>
+</div>

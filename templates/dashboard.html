@@ -1,0 +1,30 @@
+{% extends 'layout/base.html' %}
+{% block title %}AI Baby Monitor{% endblock %}
+{% block content %}
+    {% include 'partials/header_section.html' %}
+    <div class="grid grid-cols-1 xl:grid-cols-4 gap-8">
+        <div class="xl:col-span-3">
+            <div class="glass-card rounded-3xl p-6 mb-6 hover-lift" data-aos="fade-right">
+                {% include 'partials/live_metrics.html' %}
+                {% include 'partials/stream_control_panel.html' %}
+                {% include 'partials/video_container.html' %}
+            </div>
+        </div>
+        <div class="lg:col-span-1">
+            <div class="sticky top-28 space-y-6 scrollbar-hide max-h-screen overflow-y-auto">
+                {% include 'partials/sidebar_ai_features.html' %}
+                {% include 'partials/sidebar_active_viewers.html' %}
+                {% include 'partials/sidebar_system_status.html' %}
+                {% include 'partials/footer.html' %}
+            </div>
+        </div>
+    </div>
+{% endblock %}
+{% block scripts %}
+<script>
+// Moved JS logic from original index.html. For brevity, you should refactor into separate static JS files.
+// Keep placeholders to avoid breaking functionality. You can progressively extract into modular .js.
+</script>
+   <script src="{{ url_for('static', filename='js/particle_animation.js') }}"></script>
+     {% include 'scripts/dashboard.html' %}
+{% endblock %}

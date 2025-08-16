@@ -1,0 +1,16 @@
+<!-- Enhanced Keyboard Shortcuts Help Modal -->
+<div id="shortcuts-modal" class="fixed inset-0 modal-backdrop flex items-center justify-center z-50" style="display: none;">
+    <div class="glass-card rounded-2xl p-8 max-w-lg w-full mx-4 hover-lift" data-aos="zoom-in">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-2xl font-bold text-white flex items-center gap-2"><i class="fas fa-keyboard text-cyan-400"></i>Keyboard Shortcuts</h3>
+            <button onclick="toggleShortcutsHelp()" class="text-gray-400 hover:text-white text-2xl transition-colors hover-lift"><i class="fas fa-times"></i></button>
+        </div>
+        <div class="space-y-3">
+            {% include 'partials/shortcuts_items.html' %}
+        </div>
+        <div class="mt-6 p-4 bg-cyan-500 bg-opacity-10 border border-cyan-500 border-opacity-20 rounded-lg">
+            <div class="flex items-center gap-2 text-cyan-400 mb-2"><i class="fas fa-info-circle"></i><span class="font-medium">Pro Tip</span></div>
+            <p class="text-sm text-gray-300">Click anywhere on the video to manually select a child for tracking. Use the clear button to reset selection.</p>
+        </div>
+    </div>
+</div>

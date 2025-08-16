@@ -1,0 +1,28 @@
+<div class="notifications-container">
+    <button class="nav-link relative hover-lift" onclick="toggleNotifications()">
+        <i class="fas fa-bell mr-2"></i>Notifications
+        <span id="notification-badge" class="notification-badge" style="display: none;">0</span>
+    </button>
+    <div id="notifications-dropdown" class="notifications-dropdown" style="display: none;">
+        <div class="p-3 border-b border-white/10 flex justify-between items-center">
+            <h3 class="font-semibold text-white">Recent Notifications</h3>
+            <button onclick="clearAllNotifications()"
+                class="text-xs text-red-400 hover:text-red-300 transition-colors hover:scale-110 transform px-2 py-1 rounded bg-red-500 bg-opacity-10 border border-red-400 border-opacity-20">
+                <i class="fas fa-trash-alt mr-1"></i>Clear All
+            </button>
+        </div>
+        <div id="notifications-list" class="max-h-64 overflow-y-auto scrollbar-hide">
+            <div class="p-4 text-center text-gray-400 text-sm">
+                <div class="loading-spinner mx-auto mb-3"></div>
+                <i class="fas fa-bell-slash text-4xl mb-3 opacity-50 animate-pulse"></i>
+                <p class="font-medium">No notifications yet</p>
+                <p class="text-xs mt-2 opacity-70">You'll be notified of important events</p>
+                <div class="mt-3 flex justify-center space-x-2">
+                    <div class="w-2 h-2 bg-cyan-400 rounded-full opacity-30"></div>
+                    <div class="w-2 h-2 bg-purple-400 rounded-full opacity-30"></div>
+                    <div class="w-2 h-2 bg-green-400 rounded-full opacity-30"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
