@@ -134,15 +134,6 @@ class TapoCameraController:
             return []
     
     def trigger_alarm(self, duration: int = 10) -> bool:
-        """
-        Trigger camera alarm.
-        
-        Args:
-            duration (int): Alarm duration in seconds
-            
-        Returns:
-            bool: Success status
-        """
         try:
             # setAlarm typically takes (enabled, soundEnabled) parameters
             self.camera.setAlarm(True, True)
@@ -161,14 +152,3 @@ class TapoCameraController:
         except Exception as e:
             self.logger.error(f"Failed to reboot camera: {e}")
             return False
-    
-    def get_camera_status(self) -> Dict:
-        """Get comprehensive camera status."""
-        status = {
-            "timestamp": datetime.now().isoformat(),
-            "basic_info": self.get_basic_info(),
-            "privacy_mode": self.get_privacy_mode(),
-            "presets": self.get_presets()
-        }
-        return status
-    

@@ -1,4 +1,4 @@
 # Camera Controller Module
-from .camera_controller import TapoCameraController
+from .tapo_camera import TapoCameraController
 
 __all__ = ['TapoCameraController']

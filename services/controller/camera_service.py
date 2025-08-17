@@ -3,7 +3,7 @@ Camera Service Layer - Handles camera operations and abstracts camera controller
 """
 import logging
 from typing import Dict, List, Optional, Any
-from services.controller.camera_controller import TapoCameraController
+from services.controller.tapo_camera import TapoCameraController
 from config.settings import config
 
 

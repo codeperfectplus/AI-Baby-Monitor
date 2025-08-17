@@ -2,7 +2,7 @@
 Camera API Routes - Clean separation between read and write operations
 """
 from flask import Blueprint, request, jsonify
-from services.camera_service import camera_service, camera_control_service
+from services.controller.camera_service import camera_service, camera_control_service
 import logging
 
 # Separate blueprints for read and control operations
